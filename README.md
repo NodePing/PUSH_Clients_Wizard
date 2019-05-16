@@ -90,7 +90,7 @@ configured and set in your designated location.
 > **Note**
 > 
 > When configuring some metrics, it will confirm the information that
-> you entered. The information entered will be what shows up on
+> you entered. The information displayed will be what shows up on
 > NodePing. For other values that are previously entered (such as
 > checksums), values you entered will still be visible to you to
 > confirm.
