@@ -118,7 +118,7 @@ def _empty_config_file(path, client):
             f.write("[]\n")
 
 
-def _get_save_directory():
+def _get_save_directory(check_id):
     """ Asks the user the path where the client will be stored
 
     This is primarily necessary for POSIX, as the other clients are
@@ -153,12 +153,13 @@ def _get_save_directory():
     answers = _utils.confirm_choice(check_questions)
 
     if not answers['run_remote']:
-        return expanduser(answers['save_destionation'])
+        save_destionation = expanduser(answers['save_destionation'])
+        return "{0}/{1}".format(save_destionation, check_id)
     else:
         user = answers['remote_user']
         server = answers['remote_host']
         save_dir = expanduser(answers['save_destionation'])
-        path = "{0}@{1}:{2}".format(user, server, save_dir)
+        path = "{0}@{1}:{2}/{3}".format(user, server, save_dir, check_id)
 
         return path
 
@@ -181,7 +182,7 @@ def _place_client(src, dest, client, _id):
         username = dest.split('@')[0]
         host = dest.split('@')[1].split(':')[0]
         # Destination dir being copied to
-        dirname = "{0}/{1}".format(dest.split('@')[1].split(':')[1], _id)
+        dirname = dest.split('@')[1].split(':')[1]
 
         connected = False
 
@@ -215,7 +216,8 @@ def _place_client(src, dest, client, _id):
                 {
                     'type': 'input',
                     'name': 'ssh_port',
-                    'message': 'Specify the ssh port (Default 22)'
+                    'message': 'Specify the ssh port (Default 22)',
+                    'default': '22'
                 },
                 {
                     'type': 'list',
@@ -225,7 +227,8 @@ def _place_client(src, dest, client, _id):
                 }
             ]
 
-            answers = prompt(ssh_questions)
+            # answers = prompt(ssh_questions)
+            answers = _utils.confirm_choice(ssh_questions)
 
             if not answers['ssh_port']:
                 port = 22
@@ -285,10 +288,10 @@ def _place_client(src, dest, client, _id):
     else:
         if client == 'POSIX':
             dest = join(
-                dest, "{0}/NodePingPUSHClient".format(_id))
+                dest, "NodePingPUSHClient")
         else:
             dest = join(
-                dest, "{0}/NodePing{1}PUSH".format(_id, client))
+                dest, "NodePing{0}PUSH".format(client))
 
         mkpath(dest)
         copy_tree(client_dir, dest)
@@ -807,7 +810,8 @@ def insert_checktoken(checktoken, _id, unarchived, save_path, client):
 
         moduleconfig = '/full/path/to/moduleconfig'
         logfile = '/full/path/to/logfile/NodePingPUSH.log'
-        full_path = "{0}/NodePingPUSHClient".format(save_path)
+        full_path = "{0}/NodePingPUSHClient".format(
+            save_path.split('@')[1].split(':')[1])
 
         # Insert CheckID and checktoken
         filedata = filedata.replace('CHECK_ID_HERE', _id)
@@ -853,7 +857,13 @@ def main(metrics, client_zip, client):
 
     completed_checks = []
 
-    final_destination = _get_save_directory()
+    # Assigns the token to variables and removes them from the dictionary
+    checktoken = metrics['checktoken']
+    check_id = metrics['check_id']
+    del metrics['checktoken']
+    del metrics['check_id']
+
+    final_destination = _get_save_directory(check_id)
 
     # Assuming the zip file from GitHub is in the same dir as app.py
     if sys.platform == 'windows':
@@ -870,12 +880,6 @@ def main(metrics, client_zip, client):
 
     # Make the config files a clean slate to remove default modules
     _empty_config_file(unarchived, client)
-
-    # Assigns the token to variables and removes them from the dictionary
-    checktoken = metrics['checktoken']
-    check_id = metrics['check_id']
-    del metrics['checktoken']
-    del metrics['check_id']
 
     insert_checktoken(checktoken, check_id, unarchived,
                       final_destination, client)

@@ -121,7 +121,10 @@ def confirm_choice(questions):
         }
 
         for key, value in answers.items():
-            print("{0}: {1}".format(key, value))
+            if 'ssh_key_pass' in key or key == 'password':
+                print("{0}: {1}".format(key, "*" * len(value)))
+            else:
+                print("{0}: {1}".format(key, value))
 
         get_confirmation = prompt(confirmation)
 

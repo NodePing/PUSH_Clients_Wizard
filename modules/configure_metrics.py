@@ -578,23 +578,39 @@ def processor_metric(key_name):
     else:
         loads = {}
 
-        if answers['1min_min'] != '' and answers['1min_max'] != '':
+        if answers['1min_max'] != '':
             key = "{0}{1}".format(key_name, "1min")
             name = "{0}.{1}".format(key_name, "1min")
-            loads.update(
-                {key: {'name': name, 'min': answers['1min_min'], 'max': answers['1min_max']}})
 
-        if answers['5min_min'] != '' and answers['5min_max'] != '':
+            if not answers['1min_min']:
+                _min = 0
+            else:
+                _min = answers['1min_min']
+            loads.update(
+                {key: {'name': name, 'min': _min, 'max': answers['1min_max']}})
+
+        if answers['5min_max'] != '':
             key = "{0}{1}".format(key_name, "5min")
             name = "{0}.{1}".format(key_name, "5min")
-            loads.update(
-                {key: {'name': name, 'min': answers['5min_min'], 'max': answers['5min_max']}})
 
-        if answers['15min_min'] != '' and answers['15min_max'] != '':
+            if not answers['5min_min']:
+                _min = 0
+            else:
+                _min = answers['5min_min']
+            loads.update(
+                {key: {'name': name, 'min': _min, 'max': answers['5min_max']}})
+
+        if answers['15min_max'] != '':
             key = "{0}{1}".format(key_name, "15min")
             name = "{0}.{1}".format(key_name, "15min")
+
+            if not answers['15min_min']:
+                _min = 0
+            else:
+                _min = answers['15min_min']
+
             loads.update(
-                {key: {'name': name, 'min': answers['15min_min'], 'max': answers['15min_max']}})
+                {key: {'name': name, 'min': _min, 'max': answers['15min_max']}})
 
         return loads
 
