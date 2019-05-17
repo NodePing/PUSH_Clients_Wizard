@@ -507,7 +507,7 @@ def sqlstat_metric(key_name, client=None):
     return {key_name: {'name': key_name, 'min': output, 'max': output}}
 
 
-def processor_metric(key_name):
+def processor_metric(key_name, client):
     """ Set the minimum and maximum load averages expected for a system
     """
 
@@ -516,7 +516,7 @@ def processor_metric(key_name):
             'type': 'confirm',
             'name': 'is_windows',
             'message': 'Are you getting load metrics for Windows?',
-            'default': False
+            'default': False,
         },
         {
             'type': 'input',
@@ -738,44 +738,6 @@ def main(metrics, client):
         # validate if the user input was correct. If not, the while loop
         # repeats and asks the user for the data for that metric again
         while not complete:
-            # if metric == 'cassandra':
-            #     data = cassandra_metric('cassandra')
-            # elif metric == 'checkiptables':
-            #     data = checkiptables_metric('checkiptables')
-            # elif metric == 'checkpf_firewall':
-            #     data = checkpf_firewall_metric('checkpf_firewall')
-            # elif metric == 'checksum':
-            #     data = checksum_metric('checksum', client)
-            # elif metric == 'checkpid':
-            #     data = checkpid_metric('checkpid')
-            # elif metric == 'drives':
-            #     data = drives_metric('drives')
-            # elif metric == 'fileage':
-            #     data = fileage_metric('fileage')
-            # elif metric == 'iocage':
-            #     data = iocage_metric('iocage')
-            # elif metric == 'memory':
-            #     data = memory_metric('memory')
-            # elif metric == 'mysqlstat':
-            #     data = sqlstat_metric('mysqlstat', client=client)
-            # elif metric == 'pgsqlstat':
-            #     data = sqlstat_metric('pgsqlstat')
-            # elif metric == 'processor':
-            #     data = processor_metric('processor')
-            # elif metric == 'zfs':
-            #     data = zfs_metric('zfs')
-            # elif metric == 'diskfree':
-            #     data = drives_metric('diskfree')
-            # elif metric == 'load':
-            #     data = processor_metric('load')
-            # elif metric == 'memavail':
-            #     data = memavail_metric('memavail')
-            # elif metric == 'memfree':
-            #     data = memory_metric('memfree')
-            # elif metric == 'pingstatus':
-            #     data = pingstatus_metric('pingstatus')
-            # else:
-            #     break
 
             if 'cassandra' in metric:
                 data = cassandra_metric('cassandra')
@@ -800,13 +762,13 @@ def main(metrics, client):
             elif 'pgsqlstat' in metric:
                 data = sqlstat_metric('pgsqlstat')
             elif 'processor' in metric:
-                data = processor_metric('processor')
+                data = processor_metric('processor', client)
             elif 'zfs' in metric:
                 data = zfs_metric('zfs')
             elif 'diskfree' in metric:
                 data = drives_metric('diskfree')
             elif 'load' in metric:
-                data = processor_metric('load')
+                data = processor_metric('load', client)
             elif 'memavail' in metric:
                 data = memavail_metric('memavail')
             elif 'memfree' in metric:

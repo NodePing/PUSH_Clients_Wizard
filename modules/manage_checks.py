@@ -82,7 +82,7 @@ def list_checks(token):
 
     print("\n")
 
-    message = 'Print all PUSH checks?'
+    message = 'Print all PUSH checks at once?'
     printall = _utils.inquirer_confirm(message, default=False)
 
     if printall:
@@ -217,23 +217,27 @@ def configure(token):
         {
             'type': 'confirm',
             'name': 'public',
-            'message': 'Make the check public',
+            'message': 'Make the check reports public',
             'default': False
         },
         {
             'type': 'confirm',
             'name': 'oldresultfail',
-            'message': 'Fail the check when results are old?',
+            'message': 'Fail the check when results are old? (heartbeat monitoring)',
             'default': False
         },
         {
             'type': 'list',
             'name': 'sens',
-            'message': 'Set the sensitivity for the check',
+            'message': 'How many intervals before results are considered \'old\'?',
             'choices': [
-                'High (2) - Recommended',
-                'Very High (0) - may cause false downs'
-            ]
+                'Very High (0 rechecks)',
+                'High (2 rechecks)',
+                'Medium (5 rechecks)',
+                'Low (7 rechecks)',
+                'Very Low (10 rechecks)'
+            ],
+            'when': lambda check_answers: check_answers['oldresultfail']
         },
         {
             'type': 'checkbox',
@@ -260,10 +264,21 @@ def configure(token):
 
     interval = _utils.get_interval(check_answers['interval'])
 
-    if "0" in check_answers['sens']:
-        sens = 0
-    else:
+    try:
+        sens = check_answers['sens']
+    except KeyError:
         sens = 2
+    else:
+        if "(0 rechecks)" in sens:
+            sens = 0
+        elif "(2 rechecks)" in sens:
+            sens = 2
+        elif "(5 rechecks)" in sens:
+            sens = 5
+        elif "(7 rechecks)" in sens:
+            sens = 7
+        elif "(10 rechecks)" in sens:
+            sens = 10
 
     check_results = create_check.push_check(
         token,
@@ -271,17 +286,23 @@ def configure(token):
         fields=send_fields,
         oldresultfail=check_answers['oldresultfail'],
         sens=sens,
+        public=check_answers['public'],
         enabled=check_answers['enabled'],
         interval=interval,
         notifications=contacts
     )
 
     # Add checktoken to fields
-    fields.update({'checktoken': check_results['parameters']['checktoken']})
+    try:
+        fields.update(
+            {'checktoken': check_results['parameters']['checktoken']})
+    except KeyError:
+        print("Unable to connect to NodePing API. Exiting")
+        sys.exit(2)
     # Add check ID to fileds
     fields.update({'check_id': check_results['_id']})
 
-    message = "Configured metrics. Do you also wish to setup the client"
+    message = "Check successfully created in NodePing. Do you also wish to setup and deploy the client?"
 
     # setup_client = _utils.ask_yes_no(message)
     setup_client = _utils.inquirer_confirm(message)
