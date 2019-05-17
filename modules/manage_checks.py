@@ -82,7 +82,7 @@ def list_checks(token):
 
     print("\n")
 
-    message = 'Print all checks?'
+    message = 'Print all PUSH checks?'
     printall = _utils.inquirer_confirm(message, default=False)
 
     if printall:
@@ -221,19 +221,29 @@ def configure(token):
             'default': False
         },
         {
+            'type': 'confirm',
+            'name': 'oldresultfail',
+            'message': 'Fail the check when results are old?',
+            'default': False
+        },
+        {
+            'type': 'list',
+            'name': 'sens',
+            'message': 'Set the sensitivity for the check',
+            'choices': [
+                'High (2) - Recommended',
+                'Very High (0) - may cause false downs'
+            ]
+        },
+        {
             'type': 'checkbox',
             'name': 'enabled_checks',
-            'message': 'Which checks will be enabled',
+            'message': 'Select metrics to be enabled',
             'choices': metrics_list
         }
     ]
 
     check_answers = _utils.confirm_choice(check_questions)
-
-    message = "Preparing to configure metrics. Do you also wish to setup the client"
-
-    # setup_client = _utils.ask_yes_no(message)
-    setup_client = _utils.inquirer_confirm(message)
 
     # Configures fields for new PUSH check
     fields = configure_metrics.main(check_answers['enabled_checks'], client)
@@ -248,12 +258,21 @@ def configure(token):
     send_fields = copy.deepcopy(fields)
     send_fields = _strip_extra_data(send_fields)
 
+    interval = _utils.get_interval(check_answers['interval'])
+
+    if "0" in check_answers['sens']:
+        sens = 0
+    else:
+        sens = 2
+
     check_results = create_check.push_check(
         token,
         label=check_answers['label'],
         fields=send_fields,
+        oldresultfail=check_answers['oldresultfail'],
+        sens=sens,
         enabled=check_answers['enabled'],
-        interval=check_answers['interval'],
+        interval=interval,
         notifications=contacts
     )
 
@@ -262,8 +281,23 @@ def configure(token):
     # Add check ID to fileds
     fields.update({'check_id': check_results['_id']})
 
+    message = "Configured metrics. Do you also wish to setup the client"
+
+    # setup_client = _utils.ask_yes_no(message)
+    setup_client = _utils.inquirer_confirm(message)
+
     if setup_client:
-        configure_client.main(fields, CLIENT_ZIP, client)
+        if not isfile(CLIENT_ZIP):
+            print("Client required to configure. Downloading")
+            downloaded = _utils.download_file(CLIENTS_URL, CLIENT_ZIP)
+
+        # Configures the client
+        # Returns the path to where the client was stored
+        dirname = configure_client.main(fields, CLIENT_ZIP, client)
+
+        cronjob = _utils.create_cron(dirname, client, interval)
+
+        check_results.update({'cronjob': cronjob})
 
     return check_results
 

@@ -6,6 +6,7 @@ from os.path import dirname, expanduser, join, realpath
 from sys import exit
 from modules import _utils, manage_checks
 from pprint import pprint
+from PyInquirer import prompt
 
 
 CONFIGFILE = join(dirname(realpath(expanduser(__file__))), "config.ini")
@@ -24,11 +25,22 @@ def created_check(info):
     public = info['public']
     fields = info['parameters']['fields']
 
+    try:
+        cronjob = info['cronjob']
+    except KeyError:
+        cronjob = False
+
     output = "Complete!\n\nLabel: {0}\n_id: {1}\nchecktoken: {2}\nEnabled: {3}\nInterval: {4}\nPublic: {5}\nFields:".format(
         label, _id, checktoken, enabled, interval, public)
 
     print(output)
     pprint(fields)
+
+    if cronjob:
+        print("\nEnter this cron line to run the client at your specified interval:\n")
+        print("{0}\n".format(cronjob))
+
+    input("\nPress enter to continue")
 
 
 def main():
@@ -41,27 +53,38 @@ def main():
     interaction = True
 
     while interaction:
-        response = input(
-            "Do you want to (L)ist PUSH checks, (C)reate a PUSH check, (D)elete a PUSH check, or (E)xit? ").upper()
+        print("##########################")
+        print("\nNodePing PUSH Check Wizard\n")
+        print("##########################\n")
 
-        if response == "L":
+        get_started = [
+            {
+                'type': 'list',
+                'name': 'user_choice',
+                'message': 'Please select an action',
+                'choices': [
+                    'List PUSH checks',
+                    'Create a PUSH check',
+                    'Delete PUSH checks',
+                    'Exit'
+                ]
+            }
+        ]
+
+        answers = prompt(get_started)
+
+        if answers['user_choice'].startswith("L"):
             manage_checks.list_checks(token)
 
-        elif response == "C":
+        elif answers['user_choice'].startswith("C"):
             check_info = manage_checks.configure(token)
             created_check(check_info)
 
-        elif response == "D":
+        elif answers['user_choice'].startswith("D"):
             manage_checks.delete(token)
-        elif response == "E":
+        elif answers['user_choice'].startswith("E"):
             print("Bye")
             exit(0)
-        else:
-            print(
-                "Not a valid response. " +
-                "Enter:\nL - List checks\n" +
-                "C - create check\n" +
-                "D - delete check\n")
 
 
 if __name__ == '__main__':

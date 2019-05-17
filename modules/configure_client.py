@@ -62,7 +62,6 @@ def _add_metric(archive_dir, client_path, name, client):
 
         config.set('modules', name, value='yes')
         _utils.write_config(config, filename)
-
     elif client == 'PowerShell':
         filename = join(
             archive_dir, "PowerShell/NodePingPowerShellPUSH/moduleconfig.json")
@@ -282,8 +281,13 @@ def _place_client(src, dest, client, _id):
                 dest_file = join(dirname, src_file)
                 sftp.put(src_file, dest_file)
 
+                # Make remote shell scripts executable
+                sftp.chmod(dest_file, os.stat(src_file).st_mode)
+
         sftp.close()
         transport.close()
+
+        return dirname
 
     else:
         if client == 'POSIX':
@@ -295,6 +299,8 @@ def _place_client(src, dest, client, _id):
 
         mkpath(dest)
         copy_tree(client_dir, dest)
+
+        return dest
 
 
 def _unzip(zip_archive, dest_dir):
@@ -810,8 +816,13 @@ def insert_checktoken(checktoken, _id, unarchived, save_path, client):
 
         moduleconfig = '/full/path/to/moduleconfig'
         logfile = '/full/path/to/logfile/NodePingPUSH.log'
-        full_path = "{0}/NodePingPUSHClient".format(
-            save_path.split('@')[1].split(':')[1])
+
+        # If server is remote, removes the full remote path to just full path
+        try:
+            full_path = "{0}/NodePingPUSHClient".format(
+                save_path.split('@')[1].split(':')[1])
+        except IndexError:
+            full_path = "{0}/NodePingPUSHClient".format(save_path)
 
         # Insert CheckID and checktoken
         filedata = filedata.replace('CHECK_ID_HERE', _id)
@@ -848,6 +859,23 @@ def insert_checktoken(checktoken, _id, unarchived, save_path, client):
 
         with open(configfile, 'w') as f:
             f.write(filedata)
+
+
+def client_set_executable(path, client):
+    """
+    """
+
+    if client == 'Python' or client == 'Python3':
+        # Make Python script executable
+        py_script = join(
+            path, "{0}/NodePing{0}PUSH/NodePingPythonPUSH.py".format(client))
+        st = os.stat(py_script)
+        os.chmod(py_script, st.st_mode | stat.S_IEXEC)
+    elif client == 'POSIX':
+        # Make POSIX script executable
+        sh_script = join(path, "POSIX/NodePingPUSHClient/NodePingPUSH.sh")
+        st = os.stat(sh_script)
+        os.chmod(sh_script, st.st_mode | stat.S_IEXEC)
 
 
 def main(metrics, client_zip, client):
@@ -927,4 +955,12 @@ def main(metrics, client_zip, client):
 
         completed_checks.append(name)
 
+    # Sets client script to executable
+    client_set_executable(unarchived, client)
+    # Copies the client to the proper location
     _place_client(unarchived, final_destination, client, check_id)
+
+    if '@' in final_destination:
+        return final_destination.split('@')[1].split(':')[1]
+    else:
+        return final_destination

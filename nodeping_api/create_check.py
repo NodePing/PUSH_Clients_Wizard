@@ -546,6 +546,7 @@ def push_check(
         homeloc=defaults['homeloc'],
         threshold=defaults['threshold'],
         sens=defaults['sens'],
+        oldresultfail=False,
         dep="",
         notifications=""
 ):

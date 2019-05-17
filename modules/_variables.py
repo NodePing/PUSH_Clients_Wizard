@@ -1,40 +1,40 @@
 posix_metrics = [
-    'apcupsd',
-    'cassandra',
-    'checkiptables',
-    'checkpf_firewall',
-    'checkpid',
-    'checksum',
-    'drives',
-    'fileage',
-    'iocage',
-    'memory',
-    'mysqlstat',
-    'pgsqlstat',
-    'pingstatus',
-    'processor',
-    'redismaster',
-    'zfs'
+    'UPS Monitoring (apcupsd)',
+    'Cassandra Cluster Status (cassandra)',
+    'Iptables rules count (checkiptables)',
+    'PF Firewall rules count (checkpf_firewall)',
+    'PID monitor (checkpid)',
+    'File checksum monitor (checksum)',
+    'Disk Freespace (drives)',
+    'File mtime status (fileage)',
+    'Iocage jail status (iocage)',
+    'Free Memory monitor (memory)',
+    'MySQL query (mysqlstat)',
+    'PostgreSQL query (pgsqlstat)',
+    'Host ping status (pingstatus)',
+    'Load averages (processor)',
+    'Redis Master monitor (redismaster)',
+    'ZFS Dataset Freespace (zfs)'
 ]
 
 powershell_metrics = [
-    'checksum',
-    'drives',
-    'fileage',
-    'memory',
-    'processor'
+    'File checksum monitor (checksum)',
+    'Disk Freespace (drives)',
+    'File mtime status (fileage)',
+    'Free Memory monitor (memory)',
+    'Load averages (processor)'
 ]
 
 python_metrics = [
-    'apcupsd',
-    'checkpid',
-    'checksum',
-    'diskfree',
-    'fileage',
-    'load',
-    'memavail',
-    'memfree',
-    'mysqlstat',
-    'pingstatus',
-    'redismaster'
+    'UPS Monitoring (apcupsd)',
+    'PID monitor (checkpid)',
+    'File checksum monitor (checksum)',
+    'Disk Freespace (diskfree)',
+    'File mtime status (fileage)',
+    'Load averages (load)',
+    'Memory Available monitor (memavail)',
+    'Free Memory monitor (memfree)',
+    'MySQL query (mysqlstat)',
+    'Host ping status (pingstatus)',
+    'Redis Master monitor (redismaster)'
 ]

@@ -3,7 +3,7 @@
 
 import paramiko
 import urllib.request
-from os.path import isdir, isfile
+from os.path import isdir, isfile, join
 from PyInquirer import prompt
 
 
@@ -205,3 +205,60 @@ def get_sshkey(keyfile, password):
         return pk
 
     return False
+
+
+def create_cron(_dir, client, interval):
+    """ Creates a cronjob for the client
+    """
+
+    if client == 'POSIX':
+        filename = "NodePingPUSHClient/NodePingPUSH.sh"
+    elif client == 'Python' or client == 'Python3':
+        filename = "NodePing{0}PUSH/NodePingPythonPUSH.py".format(client)
+
+    full_path = join(_dir, filename)
+
+    if interval == 1:
+        cron = "* * * * * %s" % full_path
+    elif interval == 3:
+        cron = "*/3 * * * * %s" % full_path
+    elif interval == 5:
+        cron = "*/5 * * * * %s" % full_path
+    elif interval == 15:
+        cron = "*/15 * * * * %s" % full_path
+    elif interval == 60:
+        cron = "0 * * * * %s" % full_path
+    elif interval == 240:
+        cron = "0 */4 * * * %s" % full_path
+    elif interval == 360:
+        cron = "0 */6 * * * %s" % full_path
+    elif interval == 720:
+        cron = "0 */12 * * * %s" % full_path
+    elif interval == 1440:
+        cron = "0 0 * * * %s" % full_path
+
+    return cron
+
+
+def get_interval(interval):
+    """ Accepts user interval input and converts to seconds
+    """
+
+    if interval == '1 minute':
+        return 1
+    elif interval == '3 minutes':
+        return 3
+    elif interval == '5 minutes':
+        return 5
+    elif interval == '15 minutes':
+        return 15
+    elif interval == '1 hour':
+        return 60
+    elif interval == '4 hours':
+        return 240
+    elif interval == '6 hours':
+        return 360
+    elif interval == '12 hours':
+        return 720
+    elif interval == '1 day':
+        return 1440

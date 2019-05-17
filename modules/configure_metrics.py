@@ -80,12 +80,12 @@ def _get_disk_quotas(key_name, message):
             {
                 'type': 'input',
                 'name': 'min',
-                'message': 'What is the max disk free space you want it to reach (E.g 20 for 20%)?',
+                'message': 'Max disk free space percentage (E.g 20 for 20%)?',
             },
             {
                 'type': 'input',
                 'name': 'max',
-                'message': 'What is the minimum disk free space you want it to reach (E.g 80 for 80%)?',
+                'message': 'Min disk free space percentage (E.g 80 for 80%)?',
             },
             {
                 'type': 'confirm',
@@ -253,7 +253,7 @@ def checksum_metric(key_name, client=None):
         {
             'type': 'confirm',
             'name': 'has_file',
-            'message': 'Do you have a config file to read from?'
+            'message': 'Do you have an existing checksum config file to read from?'
         },
         {
             'type': 'input',
@@ -571,7 +571,11 @@ def processor_metric(key_name):
     answers = prompt(questions)
 
     if answers['is_windows']:
-        _min = answers['cpumin']
+        if not answers['cpumin']:
+            _min = 0
+        else:
+            _min = answers['cpumin']
+
         _max = answers['cpumax']
 
         return {key_name: {'name': key_name, 'min': _min, 'max': _max}}
@@ -707,15 +711,15 @@ def zfs_metric(key_name):
     return _get_disk_quotas(key_name, message)
 
 
-def start_check(name):
-    """ Print blocks to make check creation easier to read
+def start_metric(name):
+    """ Print blocks to make metric creation easier to read
     """
 
     print("===== Configuring {0} =====".format(name))
 
 
-def end_check(name):
-    """ Print blocks to make check creation easier to read
+def end_metric(name):
+    """ Print blocks to make metric creation easier to read
     """
 
     print("===== {0} configuration complete =====\n".format(name))
@@ -726,7 +730,7 @@ def main(metrics, client):
     field_values = {}
 
     for metric in metrics:
-        start_check(metric)
+        start_metric(metric)
 
         complete = False
 
@@ -734,41 +738,80 @@ def main(metrics, client):
         # validate if the user input was correct. If not, the while loop
         # repeats and asks the user for the data for that metric again
         while not complete:
-            if metric == 'cassandra':
+            # if metric == 'cassandra':
+            #     data = cassandra_metric('cassandra')
+            # elif metric == 'checkiptables':
+            #     data = checkiptables_metric('checkiptables')
+            # elif metric == 'checkpf_firewall':
+            #     data = checkpf_firewall_metric('checkpf_firewall')
+            # elif metric == 'checksum':
+            #     data = checksum_metric('checksum', client)
+            # elif metric == 'checkpid':
+            #     data = checkpid_metric('checkpid')
+            # elif metric == 'drives':
+            #     data = drives_metric('drives')
+            # elif metric == 'fileage':
+            #     data = fileage_metric('fileage')
+            # elif metric == 'iocage':
+            #     data = iocage_metric('iocage')
+            # elif metric == 'memory':
+            #     data = memory_metric('memory')
+            # elif metric == 'mysqlstat':
+            #     data = sqlstat_metric('mysqlstat', client=client)
+            # elif metric == 'pgsqlstat':
+            #     data = sqlstat_metric('pgsqlstat')
+            # elif metric == 'processor':
+            #     data = processor_metric('processor')
+            # elif metric == 'zfs':
+            #     data = zfs_metric('zfs')
+            # elif metric == 'diskfree':
+            #     data = drives_metric('diskfree')
+            # elif metric == 'load':
+            #     data = processor_metric('load')
+            # elif metric == 'memavail':
+            #     data = memavail_metric('memavail')
+            # elif metric == 'memfree':
+            #     data = memory_metric('memfree')
+            # elif metric == 'pingstatus':
+            #     data = pingstatus_metric('pingstatus')
+            # else:
+            #     break
+
+            if 'cassandra' in metric:
                 data = cassandra_metric('cassandra')
-            elif metric == 'checkiptables':
+            elif 'checkiptables' in metric:
                 data = checkiptables_metric('checkiptables')
-            elif metric == 'checkpf_firewall':
+            elif 'checkpf_firewall' in metric:
                 data = checkpf_firewall_metric('checkpf_firewall')
-            elif metric == 'checksum':
+            elif 'checksum' in metric:
                 data = checksum_metric('checksum', client)
-            elif metric == 'checkpid':
+            elif 'checkpid' in metric:
                 data = checkpid_metric('checkpid')
-            elif metric == 'drives':
+            elif 'drives' in metric:
                 data = drives_metric('drives')
-            elif metric == 'fileage':
+            elif 'fileage' in metric:
                 data = fileage_metric('fileage')
-            elif metric == 'iocage':
+            elif 'iocage' in metric:
                 data = iocage_metric('iocage')
-            elif metric == 'memory':
+            elif 'memory' in metric:
                 data = memory_metric('memory')
-            elif metric == 'mysqlstat':
+            elif 'mysqlstat' in metric:
                 data = sqlstat_metric('mysqlstat', client=client)
-            elif metric == 'pgsqlstat':
+            elif 'pgsqlstat' in metric:
                 data = sqlstat_metric('pgsqlstat')
-            elif metric == 'processor':
+            elif 'processor' in metric:
                 data = processor_metric('processor')
-            elif metric == 'zfs':
+            elif 'zfs' in metric:
                 data = zfs_metric('zfs')
-            elif metric == 'diskfree':
+            elif 'diskfree' in metric:
                 data = drives_metric('diskfree')
-            elif metric == 'load':
+            elif 'load' in metric:
                 data = processor_metric('load')
-            elif metric == 'memavail':
+            elif 'memavail' in metric:
                 data = memavail_metric('memavail')
-            elif metric == 'memfree':
+            elif 'memfree' in metric:
                 data = memory_metric('memfree')
-            elif metric == 'pingstatus':
+            elif 'pingstatus' in metric:
                 data = pingstatus_metric('pingstatus')
             else:
                 break
@@ -797,12 +840,12 @@ def main(metrics, client):
 
         # Metrics here expect no user input and don't need to be
         # prompted for user confirmation for the data being correct
-        if metric == 'apcupsd':
+        if 'apcupsd' in metric:
             data = apcupsd_metric('apcupsd')
-        elif metric == 'redismaster':
+        elif 'redismaster' in metric:
             data = redismaster_metric('redismaster')
 
-        end_check(metric)
+        end_metric(metric)
 
         field_values.update(data)
 
