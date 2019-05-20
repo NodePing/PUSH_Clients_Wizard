@@ -287,7 +287,7 @@ def _place_client(src, dest, client, _id):
         sftp.close()
         transport.close()
 
-        return dirname
+        return answers['remote_os']
 
     else:
         if client == 'POSIX':
@@ -300,7 +300,10 @@ def _place_client(src, dest, client, _id):
         mkpath(dest)
         copy_tree(client_dir, dest)
 
-        return dest
+        if os.name == 'nt':
+            return 'Windows'
+        else:
+            return 'Other'
 
 
 def _unzip(zip_archive, dest_dir):
@@ -958,9 +961,10 @@ def main(metrics, client_zip, client):
     # Sets client script to executable
     client_set_executable(unarchived, client)
     # Copies the client to the proper location
-    _place_client(unarchived, final_destination, client, check_id)
+    # Gets OS that client was copied to
+    os = _place_client(unarchived, final_destination, client, check_id)
 
     if '@' in final_destination:
         return final_destination.split('@')[1].split(':')[1]
     else:
-        return final_destination
+        return {'dest': final_destination, 'os': os}

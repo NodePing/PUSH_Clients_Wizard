@@ -4,25 +4,7 @@
 import paramiko
 import urllib.request
 from os.path import isdir, isfile, join
-from PyInquirer import prompt
-
-
-def inquirer_confirm(message, default=True):
-    """
-    """
-
-    questions = [
-        {
-            'type': 'confirm',
-            'name': 'response',
-            'message': message,
-            'default': default
-        }
-    ]
-
-    answers = prompt(questions)
-
-    return answers['response']
+from PyInquirer import prompt, Validator, ValidationError
 
 
 def write_config(config, conf_ini):
@@ -136,6 +118,24 @@ def confirm_choice(questions):
     return answers
 
 
+def inquirer_confirm(message, default=True):
+    """
+    """
+
+    questions = [
+        {
+            'type': 'confirm',
+            'name': 'response',
+            'message': message,
+            'default': default
+        }
+    ]
+
+    answers = prompt(questions)
+
+    return answers['response']
+
+
 def make_missing_dirs(sftp_client, remote_dir, remote_os):
     """ Walks a remote directory and creates directories that don't exist
 
@@ -207,7 +207,7 @@ def get_sshkey(keyfile, password):
     return False
 
 
-def create_cron(_dir, client, interval):
+def create_cron(_dir, client, interval, label):
     """ Creates a cronjob for the client
     """
 
@@ -215,6 +215,8 @@ def create_cron(_dir, client, interval):
         filename = "NodePingPUSHClient/NodePingPUSH.sh"
     elif client == 'Python' or client == 'Python3':
         filename = "NodePing{0}PUSH/NodePingPythonPUSH.py".format(client)
+    elif client == 'PowerShell':
+        return create_win_schedule(_dir, client, interval, label)
 
     full_path = join(_dir, filename)
 
@@ -240,6 +242,28 @@ def create_cron(_dir, client, interval):
     return cron
 
 
+def create_win_schedule(_dir, client, interval, label):
+    """ Creates a Windows scheduled task
+    """
+
+    label = "NodePing - {0}".format(label)
+
+    if client == 'PowerShell':
+        filename = "NodePingPowerShellPUSH/NodePingPUSH.ps1"
+        full_path = join(_dir, filename)
+
+        task = "schtasks /create /tn {0} /sc minute /mo {1} /tr PowerShell {2}".format(
+            label, interval, full_path)
+    elif client == 'Python' or client == 'Python3':
+        filename = "NodePing{0}PUSH/NodePingPythonPUSH.py".format(client)
+        full_path = join(_dir, filename)
+
+        task = "schtasks /create /tn {0} /sc minute /mo {1} /tr PowerShell {3} {4}".format(
+            label, interval, client.lower(), full_path)
+
+    return task
+
+
 def get_interval(interval):
     """ Accepts user interval input and converts to seconds
     """
@@ -262,3 +286,13 @@ def get_interval(interval):
         return 720
     elif interval == '1 day':
         return 1440
+
+
+class IntValidator(Validator):
+    def validate(self, num):
+        try:
+            num = int(num.text)
+        except ValueError:
+            raise ValidationError(
+                message="Please enter an integer",
+                cursor_position=len(num.text))

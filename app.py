@@ -23,22 +23,26 @@ def created_check(info):
     enabled = info['enable']
     interval = info['interval']
     public = info['public']
+    oldresultfail = info['parameters']['oldresultfail']
     fields = info['parameters']['fields']
 
     try:
-        cronjob = info['cronjob']
+        job = info['scheduled_job']
     except KeyError:
-        cronjob = False
+        job = False
 
-    output = "Complete!\n\nLabel: {0}\n_id: {1}\nchecktoken: {2}\nEnabled: {3}\nInterval: {4}\nPublic: {5}\nFields:".format(
-        label, _id, checktoken, enabled, interval, public)
+    output = "Complete!\n\nLabel: {0}\n_id: {1}\nchecktoken: {2}\nEnabled: {3}\nInterval: {4}\nPublic: {5}\nFail when resultsare old: {6}\nFields:".format(
+        label, _id, checktoken, enabled, interval, public, oldresultfail)
 
     print(output)
     pprint(fields)
 
-    if cronjob:
+    if job and "schtasks" in job:
+        print("\nRun this command in your Windows PowerShell:\n")
+        print("{0}\n".format(job))
+    elif job:
         print("\nEnter this cron line to run the client at your specified interval:\n")
-        print("{0}\n".format(cronjob))
+        print("{0}\n".format(job))
 
     input("\nPress enter to continue")
 

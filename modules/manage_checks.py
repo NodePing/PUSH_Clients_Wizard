@@ -90,14 +90,25 @@ def list_checks(token):
 
     # Prints each check in a user-readable format
     for key, contents in push_checks.items():
+
+        # If no label, substitute for placeholder
         try:
             label = contents['label']
         except KeyError:
             label = "(none)"
+
+        # If no oldresultfail, it is False
+        try:
+            oldresultfail = str(contents['parameters']['oldresultfail'])
+            print(oldresultfail)
+        except KeyError:
+            oldresultfail = False
+
         _utils.seperator()
         print("Label: %s" % label)
         print("ID: %s" % contents['_id'])
         print("Checktoken: %s" % contents['parameters']['checktoken'])
+        print("Fail when results are old: %s" % oldresultfail)
 
         # If the check hasn't had a PASS/FAIL status, a - is put in its place
         try:
@@ -182,8 +193,8 @@ def configure(token):
             downloaded = _utils.download_file(CLIENTS_URL, CLIENT_ZIP)
             print("File downloaded")
 
-        if not downloaded:
-            print("File not downloaded. Setting up without the client")
+        # if not downloaded:
+        #     print("File not downloaded. Setting up without the client")
 
     # Template of questions to ask user
     check_questions = [
@@ -224,19 +235,13 @@ def configure(token):
             'type': 'confirm',
             'name': 'oldresultfail',
             'message': 'Fail the check when results are old? (heartbeat monitoring)',
-            'default': False
+            'default': False,
         },
         {
-            'type': 'list',
+            'type': 'input',
             'name': 'sens',
             'message': 'How many intervals before results are considered \'old\'?',
-            'choices': [
-                'Very High (0 rechecks)',
-                'High (2 rechecks)',
-                'Medium (5 rechecks)',
-                'Low (7 rechecks)',
-                'Very Low (10 rechecks)'
-            ],
+            'validate': _utils.IntValidator,
             'when': lambda check_answers: check_answers['oldresultfail']
         },
         {
@@ -264,25 +269,17 @@ def configure(token):
 
     interval = _utils.get_interval(check_answers['interval'])
 
+    label = check_answers['label']
+
+    # Checks if sens was configured. If not configured, the value is set to 2
     try:
         sens = check_answers['sens']
     except KeyError:
         sens = 2
-    else:
-        if "(0 rechecks)" in sens:
-            sens = 0
-        elif "(2 rechecks)" in sens:
-            sens = 2
-        elif "(5 rechecks)" in sens:
-            sens = 5
-        elif "(7 rechecks)" in sens:
-            sens = 7
-        elif "(10 rechecks)" in sens:
-            sens = 10
 
     check_results = create_check.push_check(
         token,
-        label=check_answers['label'],
+        label=label,
         fields=send_fields,
         oldresultfail=check_answers['oldresultfail'],
         sens=sens,
@@ -296,42 +293,60 @@ def configure(token):
     try:
         fields.update(
             {'checktoken': check_results['parameters']['checktoken']})
+    # If a checktoken doesn't exist, then querying NodePing failed
     except KeyError:
         print("Unable to connect to NodePing API. Exiting")
         sys.exit(2)
+
     # Add check ID to fileds
     fields.update({'check_id': check_results['_id']})
 
     message = "Check successfully created in NodePing. Do you also wish to setup and deploy the client?"
 
-    # setup_client = _utils.ask_yes_no(message)
     setup_client = _utils.inquirer_confirm(message)
 
     if setup_client:
+        # If the user didn't download a client file and we got to this point, download it anyways
         if not isfile(CLIENT_ZIP):
             print("Client required to configure. Downloading")
             downloaded = _utils.download_file(CLIENTS_URL, CLIENT_ZIP)
 
         # Configures the client
-        # Returns the path to where the client was stored
-        dirname = configure_client.main(fields, CLIENT_ZIP, client)
+        # Returns the path to where the client was stored and os
+        remote_data = configure_client.main(fields, CLIENT_ZIP, client)
 
-        cronjob = _utils.create_cron(dirname, client, interval)
+        remote_dir = remote_data['dest']
+        os = remote_data['os']
 
-        check_results.update({'cronjob': cronjob})
+        # Create cron job or windows scheduled task based on target OS
+        if os == 'Windows':
+            scheduled_job = _utils.create_win_schedule(
+                remote_dir, client, interval, label)
+        else:
+            scheduled_job = _utils.create_cron(
+                remote_dir, client, interval, label)
+
+        check_results.update({'scheduled_job': scheduled_job})
 
     return check_results
 
 
 def delete(token):
-    """
+    """ Get a list of existing PUSH checks and let the user select and delete
+
+    Lists the existing PUSH checks on the user's account. The user checks the
+    checkboxes of checks they want to delete, then NodePing is queried and
+    requested to delete the selected checks
     """
 
+    # Fetches existing PUSH checks
     checks = _fetch_checks(token)
 
     checks_list = []
 
     for key, value in checks.items():
+
+        # If no label exists, set label to (No Label)
         try:
             label = value['label']
         except KeyError:
@@ -341,6 +356,7 @@ def delete(token):
 
         checks_list.append("%s - %s" % (label, checktoken))
 
+    # Needs to be converted to a list of dictionaries
     checks_dict = _utils.list_to_dicts(checks_list, 'name')
 
     questions = [
@@ -356,6 +372,7 @@ def delete(token):
 
     _utils.seperator()
 
+    # Prints the selected checks to console
     for item in answers['remove_checks']:
         print(item)
 
@@ -363,9 +380,9 @@ def delete(token):
 
     message = "Are you sure you want to remove the selected checks"
 
-    # confirm = _utils.ask_yes_no(message)
     confirm = _utils.inquirer_confirm(message, default=False)
 
+    # Deletes all selected checks
     if confirm:
         for key, value in checks.items():
             checktoken = value['parameters']['checktoken']
