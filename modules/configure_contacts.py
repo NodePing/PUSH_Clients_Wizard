@@ -154,12 +154,20 @@ def main(token, customerid=None):
 
     query_nodeping = get_contacts.GetContacts(token, customerid)
 
+    # All availavle schedules to user
+    all_schedules = ["All the time"]
+
+    # Collects existin schedules from user's account
     cust_schedules = schedules.get_schedule(token, customerid=customerid)
+
+    # Gets the names of the schedules
+    for key, value in cust_schedules.items():
+        all_schedules.append(key)
 
     contacts = query_nodeping.get_all()
 
     contacts = format_contacts(contacts)
 
-    contact_info = choose_contacts(contacts, cust_schedules)
+    contact_info = choose_contacts(contacts, all_schedules)
 
     return contact_info

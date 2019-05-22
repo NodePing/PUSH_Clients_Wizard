@@ -172,6 +172,10 @@ def _place_client(src, dest, client, _id):
     for ssh
     """
 
+    _utils.seperator()
+
+    print("Gathering SSH information")
+
     if client == 'POSIX':
         client_dir = join(src, "POSIX/NodePingPUSHClient")
     else:
@@ -322,6 +326,8 @@ def configure_checksum(keys, all_metrics, archive_dir, client):
     and stores variables in a format that the language reads.
     """
 
+    print("\n=====Configuring the checksum metric=====")
+
     hash_dict = {}
     hash_list_ps = []
 
@@ -399,6 +405,8 @@ def configure_checkpid(keys, all_metrics, archive_dir, client):
     and stores variables in a format that the language reads.
     """
 
+    print("\n=====Configuring the checkpid metric=====")
+
     filenames = []
 
     for key in keys:
@@ -441,6 +449,8 @@ def configure_fileage(keys, all_metrics, archive_dir, client):
 
     Sets up the fileage metrics in the appropriate client config files
     """
+
+    print("\n=====Configuring the fileage metric=====")
 
     if client == 'POSIX':
         fileage_dir = "{0}/POSIX/NodePingPUSHClient/modules/fileage".format(
@@ -524,7 +534,7 @@ def configure_mysqlstat(archive_dir, client):
     """
 
     _utils.seperator()
-    print("\n=====Configuring the mysqlstat client=====")
+    print("\n=====Configuring the mysqlstat metric=====")
 
     questions = [
         {
@@ -622,7 +632,7 @@ def configure_pgsqlstat(archive_dir, client):
     """
 
     _utils.seperator()
-    print("\n=====Configuring the pgsqlstat client=====")
+    print("\n=====Configuring the pgsqlstat metric=====")
 
     questions = [
         {
@@ -671,7 +681,7 @@ def configure_pingstatus(keys, all_metrics, archive_dir, client):
     """
 
     _utils.seperator()
-    print("\n=====Configuring the pingstatus client")
+    print("\n=====Configuring the pingstatus metric=====")
 
     hosts = []
 
@@ -731,7 +741,7 @@ def configure_redismaster(archive_dir, client):
     """
 
     _utils.seperator()
-    print("\n=====Configuring the redismaster client")
+    print("\n=====Configuring the redismaster metric=====")
 
     questions = [
         {
@@ -909,12 +919,6 @@ def main(metrics, client_zip, client):
     if isfile(client_zip):
         _unzip(client_zip, archive_dir)
 
-    # Make the config files a clean slate to remove default modules
-    _empty_config_file(unarchived, client)
-
-    insert_checktoken(checktoken, check_id, unarchived,
-                      final_destination, client)
-
     for key, value in metrics.items():
         name = value['name'].split('.')[0]
 
@@ -958,6 +962,12 @@ def main(metrics, client_zip, client):
 
         completed_checks.append(name)
 
+    # Make the config files a clean slate to remove default modules
+    _empty_config_file(unarchived, client)
+
+    insert_checktoken(checktoken, check_id, unarchived,
+                      final_destination, client)
+
     # Sets client script to executable
     client_set_executable(unarchived, client)
     # Copies the client to the proper location
@@ -965,6 +975,6 @@ def main(metrics, client_zip, client):
     os = _place_client(unarchived, final_destination, client, check_id)
 
     if '@' in final_destination:
-        return final_destination.split('@')[1].split(':')[1]
+        return {'dest': final_destination.split('@')[1].split(':')[1], 'os': os}
     else:
         return {'dest': final_destination, 'os': os}
