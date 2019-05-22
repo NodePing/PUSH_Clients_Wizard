@@ -270,7 +270,7 @@ def create_win_schedule(_dir, client, interval, label):
         filename = "NodePing{0}PUSH/NodePingPythonPUSH.py".format(client)
         full_path = join(_dir, filename)
 
-        task = "schtasks /create /tn {0} /sc minute /mo {1} /tr PowerShell {3} {4}".format(
+        task = "schtasks /create /tn {0} /sc minute /mo {1} /tr PowerShell {2} {3}".format(
             label, interval, client.lower(), full_path)
 
     return task
