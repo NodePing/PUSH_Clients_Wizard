@@ -52,7 +52,7 @@ def main():
     config = configparser.ConfigParser()
     config.read(CONFIGFILE)
 
-    token = _utils.get_user_token(config, CONFIGFILE)
+    token, customerid = _utils.get_user_token(config, CONFIGFILE)
 
     interaction = True
 
@@ -77,16 +77,16 @@ def main():
 
         answers = prompt(get_started)
 
-        if answers['user_choice'].startswith("L"):
-            manage_checks.list_checks(token)
+        if answers['user_choice'] == "List PUSH checks":
+            manage_checks.list_checks(token, customerid)
 
-        elif answers['user_choice'].startswith("C"):
-            check_info = manage_checks.configure(token)
+        elif answers['user_choice'] == "Create a PUSH check":
+            check_info = manage_checks.configure(token, customerid)
             created_check(check_info)
 
-        elif answers['user_choice'].startswith("D"):
-            manage_checks.delete(token)
-        elif answers['user_choice'].startswith("E"):
+        elif answers['user_choice'] == "Delete PUSH checks":
+            manage_checks.delete(token, customerid)
+        elif answers['user_choice'] == "Exit":
             print("Bye")
             exit(0)
 

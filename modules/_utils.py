@@ -23,28 +23,40 @@ def get_user_token(config, conf_ini):
     the user is prompted to supply it
     """
 
+    # Get the API token. If no config is present, one is created blank
     try:
         token = config['main']['token']
     except KeyError:
         config['main'] = {'token': ''}
+        config['main'] = {'customerid': ''}
         write_config(config, conf_ini)
 
         token = config['main']['token']
 
+    # Get the subaccount ID. If no subaccount, it is left blank
+    try:
+        customerid = config['main']['customerid']
+    except KeyError:
+        customerid = None
+
     if not token:
         token = str(input("Please enter your API token: "))
-        message = "Do you want to store this token for later"
-        # save_token = ask_yes_no(message, default="Y")
+        customerid = str(
+            input("Enter your subaccount customer id (optional): "))
+        message = "Do you want to store this info for later"
         save_token = inquirer_confirm(message, default=True)
 
         if save_token:
             config['main']['token'] = token
 
+            if customerid:
+                config['main']['customerid'] = customerid
+
             write_config(config, conf_ini)
     else:
         token = config['main']['token']
 
-    return token
+    return token, customerid
 
 
 def seperator():

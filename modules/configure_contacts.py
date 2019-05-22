@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 from PyInquirer import prompt
-from nodeping_api import get_contacts
+from nodeping_api import get_contacts, schedules
 
 from . import _utils
 
 
-def choose_contacts(contact_dict):
+def choose_contacts(contact_dict, cust_schedules):
     """ Asks the user what contacts they wish to use
 
     Asks the user what contacts will be assigned to notifications
@@ -50,14 +50,8 @@ def choose_contacts(contact_dict):
                 {
                     'type': 'list',
                     'name': 'schedule',
-                    'message': 'What is the time schedule for receiving notifications',
-                    'choices': [
-                        'All the time',
-                        'Weekends',
-                        'Weekdays',
-                        'Days',
-                        'Nights'
-                    ],
+                    'message': 'What notification schedule would you like to use',
+                    'choices': cust_schedules,
                     'when': lambda answers: answers['contact'] != "None"
                 },
                 {
@@ -159,10 +153,13 @@ def main(token, customerid=None):
     """
 
     query_nodeping = get_contacts.GetContacts(token, customerid)
+
+    cust_schedules = schedules.get_schedule(token, customerid=customerid)
+
     contacts = query_nodeping.get_all()
 
     contacts = format_contacts(contacts)
 
-    contact_info = choose_contacts(contacts)
+    contact_info = choose_contacts(contacts, cust_schedules)
 
     return contact_info

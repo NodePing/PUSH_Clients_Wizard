@@ -47,7 +47,7 @@ def _strip_extra_data(fields):
     return new_fields
 
 
-def _fetch_checks(token):
+def _fetch_checks(token, customerid=None):
     """ Fetches all NodePing checks of type PUSH
 
     Fetches all NodePing checks for the account and returns only the
@@ -56,7 +56,7 @@ def _fetch_checks(token):
 
     push_checks = {}
 
-    query_nodeping = get_checks.GetChecks(token)
+    query_nodeping = get_checks.GetChecks(token, customerid=customerid)
     checks = query_nodeping.all_checks()
 
     for key, value in checks.items():
@@ -68,7 +68,7 @@ def _fetch_checks(token):
     return push_checks
 
 
-def list_checks(token):
+def list_checks(token, customerid=None):
     """ List PUSH checks that are fetched with _fetch_checks
 
     Asks the user if they want to print all PUSH checks in a
@@ -76,11 +76,22 @@ def list_checks(token):
     one-by-one or stop printing.
     """
 
-    push_checks = _fetch_checks(token)
+    if customerid:
+        subacount_msg = "Do you want to list checks from your subaccount?"
+        use_subaccount = _utils.inquirer_confirm(subacount_msg, default=False)
+
+        if not use_subaccount:
+            customerid = None
+
+    push_checks = _fetch_checks(token, customerid)
 
     next = ""
 
     print("\n")
+
+    if not push_checks:
+        print("No push checks created for this account account")
+        return
 
     message = 'Print all PUSH checks at once?'
     printall = _utils.inquirer_confirm(message, default=False)
@@ -134,7 +145,7 @@ def list_checks(token):
     _utils.seperator()
 
 
-def configure(token):
+def configure(token, customerid=None):
     """ Configures the check for NodePing and optionally the client
     """
 
@@ -257,9 +268,18 @@ def configure(token):
     # Configures fields for new PUSH check
     fields = configure_metrics.main(check_answers['enabled_checks'], client)
 
+    # Asks user if they want to create the check for their subaccount or main
+    if customerid:
+
+        subacount_msg = "Do you want to create your check with your subaccount?"
+        use_subaccount = _utils.inquirer_confirm(subacount_msg, default=False)
+
+        if not use_subaccount:
+            customerid = None
+
     _utils.seperator()
     print("Configuring contacts for check\n")
-    contacts = configure_contacts.main(token)
+    contacts = configure_contacts.main(token, customerid=customerid)
     _utils.seperator()
 
     # Removes some data before sending such as checksums and fileage so that
@@ -280,6 +300,7 @@ def configure(token):
     check_results = create_check.push_check(
         token,
         label=label,
+        customerid=customerid,
         fields=send_fields,
         oldresultfail=check_answers['oldresultfail'],
         sens=sens,
@@ -331,7 +352,7 @@ def configure(token):
     return check_results
 
 
-def delete(token):
+def delete(token, customerid=None):
     """ Get a list of existing PUSH checks and let the user select and delete
 
     Lists the existing PUSH checks on the user's account. The user checks the
@@ -339,8 +360,15 @@ def delete(token):
     requested to delete the selected checks
     """
 
+    if customerid:
+        subacount_msg = "Do you want to delete checks from your subaccount?"
+        use_subaccount = _utils.inquirer_confirm(subacount_msg, default=False)
+
+        if not use_subaccount:
+            customerid = None
+
     # Fetches existing PUSH checks
-    checks = _fetch_checks(token)
+    checks = _fetch_checks(token, customerid=customerid)
 
     checks_list = []
 

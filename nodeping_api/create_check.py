@@ -9,7 +9,7 @@ defaults = {
     'interval': 15,
     'enabled': False,
     'public': False,
-    'runlocations': 'wlw',
+    'runlocations': None,
     'homeloc': False,
     'ipv6': False,
     'threshold': 5,
