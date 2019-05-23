@@ -4,6 +4,7 @@
 import copy
 import sys
 import os.path
+import urllib.error
 from os.path import abspath, dirname, isfile, join
 from PyInquirer import prompt
 from nodeping_api import delete_checks, get_checks, create_check
@@ -418,7 +419,10 @@ def delete(token, customerid=None):
             for to_remove in answers['remove_checks']:
                 if checktoken in to_remove:
                     checkid = value['_id']
-                    delete_checks.remove(token, checkid)
+                    try:
+                        delete_checks.remove(token, checkid)
+                    except urllib.error.URLError:
+                        raise("Lost connection to NodePing")
 
                     print("Deleted %s" % to_remove)
 

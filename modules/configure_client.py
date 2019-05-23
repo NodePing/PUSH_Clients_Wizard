@@ -4,6 +4,7 @@
 from . import _utils
 import configparser
 import cryptography.utils
+import distutils.errors
 import json
 import sys
 import zipfile
@@ -41,6 +42,7 @@ def _add_metric(archive_dir, client_path, name, client):
             client_path, 'NodePingPUSHClient/modules/{0}/{0}.sh\n'.format(name))
 
         string = "{0}={1}".format(name, metric_path)
+        print(string)
 
         # Append the location of the module to the moduleconfig file
         with open(filename, 'a') as f:
@@ -174,7 +176,10 @@ def _place_client(src, dest, client, _id):
 
     _utils.seperator()
 
-    print("Gathering SSH information")
+    if os.name == 'nt':
+        os_name = 'Windows'
+    else:
+        os_name = 'Other'
 
     if client == 'POSIX':
         client_dir = join(src, "POSIX/NodePingPUSHClient")
@@ -188,6 +193,8 @@ def _place_client(src, dest, client, _id):
         dirname = dest.split('@')[1].split(':')[1]
 
         connected = False
+
+        print("Gathering SSH information")
 
         while not connected:
 
@@ -301,13 +308,25 @@ def _place_client(src, dest, client, _id):
             dest = join(
                 dest, "NodePing{0}PUSH".format(client))
 
-        mkpath(dest)
-        copy_tree(client_dir, dest)
+        try:
+            os.makedirs(dest)
+        except PermissionError:
+            print("You do not have permissions to create this directory")
+            print(
+                "You can find the configured client in {0}\n".format(client_dir))
+            input("Press enter to continue: ")
 
-        if os.name == 'nt':
-            return 'Windows'
-        else:
-            return 'Other'
+            return os_name
+
+        try:
+            copy_tree(client_dir, dest)
+        except distutils.errors.DistutilsFileError:
+            print("You do not have permissions to copy files to this directory")
+            print(
+                "You can find the configured client in {0}\n".format(client_dir))
+            input("Press enter to continue: ")
+
+        return os_name
 
 
 def _unzip(zip_archive, dest_dir):
@@ -919,6 +938,9 @@ def main(metrics, client_zip, client):
     if isfile(client_zip):
         _unzip(client_zip, archive_dir)
 
+    # Make the config files a clean slate to remove default modules
+    _empty_config_file(unarchived, client)
+
     for key, value in metrics.items():
         name = value['name'].split('.')[0]
 
@@ -962,9 +984,7 @@ def main(metrics, client_zip, client):
 
         completed_checks.append(name)
 
-    # Make the config files a clean slate to remove default modules
-    _empty_config_file(unarchived, client)
-
+    # Inserts check token into the proper file
     insert_checktoken(checktoken, check_id, unarchived,
                       final_destination, client)
 
