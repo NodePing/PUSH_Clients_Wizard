@@ -176,11 +176,6 @@ def _place_client(src, dest, client, _id):
 
     _utils.seperator()
 
-    if os.name == 'nt':
-        os_name = 'Windows'
-    else:
-        os_name = 'Other'
-
     if client == 'POSIX':
         client_dir = join(src, "POSIX/NodePingPUSHClient")
     else:
@@ -245,7 +240,11 @@ def _place_client(src, dest, client, _id):
             else:
                 port = int(answers['ssh_port'])
 
-            transport = paramiko.Transport((host, port))
+            try:
+                transport = paramiko.Transport((host, port))
+            except paramiko.ssh_exception.SSHException:
+                print("Unable to connect. Try again")
+                return answers['remote_os']
 
             if answers['use_password'] == 'password':
                 try:
@@ -301,6 +300,11 @@ def _place_client(src, dest, client, _id):
         return answers['remote_os']
 
     else:
+        if os.name == 'nt':
+            os_name = 'Windows'
+        else:
+            os_name = 'Other'
+
         if client == 'POSIX':
             dest = join(
                 dest, "NodePingPUSHClient")

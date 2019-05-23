@@ -3,6 +3,7 @@
 
 import paramiko
 import urllib.request
+from os import name as os_name
 from os.path import isdir, isfile, join
 from PyInquirer import prompt, Validator, ValidationError
 
@@ -258,19 +259,36 @@ def create_win_schedule(_dir, client, interval, label):
     """ Creates a Windows scheduled task
     """
 
-    label = "NodePing - {0}".format(label)
+    if label == "":
+        label = "check"
+
+    label = "NodePing-{0}".format(label)
 
     if client == 'PowerShell':
         filename = "NodePingPowerShellPUSH/NodePingPUSH.ps1"
         full_path = join(_dir, filename)
+        full_path = full_path.replace('/', '\\')
 
-        task = "schtasks /create /tn {0} /sc minute /mo {1} /tr PowerShell {2}".format(
+        # If creating a Windows client on a POSIX OS, fix the path
+        if os_name == 'posix':
+            full_path = list(full_path)
+            full_path.insert(1, ':')
+            full_path = ''.join(full_path)
+
+        task = "schtasks /create /tn \'{0}\' /sc minute /mo {1} /tr \'PowerShell {2}\'".format(
             label, interval, full_path)
     elif client == 'Python' or client == 'Python3':
         filename = "NodePing{0}PUSH/NodePingPythonPUSH.py".format(client)
         full_path = join(_dir, filename)
+        full_path = full_path.replace('/', '\\')
 
-        task = "schtasks /create /tn {0} /sc minute /mo {1} /tr PowerShell {2} {3}".format(
+        # If creating a Windows client on a POSIX OS, fix the path
+        if os_name == 'posix':
+            full_path = list(full_path)
+            full_path.insert(1, ':')
+            full_path = ''.join(full_path)
+
+        task = "schtasks /create /tn \'{0}\' /sc minute /mo {1} /tr \'PowerShell {2} {3}\'".format(
             label, interval, client.lower(), full_path)
 
     return task
