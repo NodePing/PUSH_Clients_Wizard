@@ -175,39 +175,6 @@ def configure(token, customerid=None):
 
     metrics_list = _utils.list_to_dicts(metrics, 'name')
 
-    # Asks user if they want to download the client
-    questions = [
-        {
-            'type': 'confirm',
-            'name': 'get_clients',
-            'message': 'Do you want to download a copy of the client?',
-            'default': False
-        }
-    ]
-
-    answers = prompt(questions)
-
-    get_clients = answers['get_clients']
-
-    # Fetches the master.zip from CLIENTS_URL
-    if get_clients:
-        # Asks user if they want to download the zip file again if it exists
-        if isfile(CLIENT_ZIP):
-            message = 'Client exists. Download again?'
-            get_again = _utils.inquirer_confirm(message)
-
-            if get_again:
-                downloaded = _utils.download_file(CLIENTS_URL, CLIENT_ZIP)
-            else:
-                # Set to true because the file already exists
-                downloaded = True
-        else:
-            downloaded = _utils.download_file(CLIENTS_URL, CLIENT_ZIP)
-            print("File downloaded")
-
-        # if not downloaded:
-        #     print("File not downloaded. Setting up without the client")
-
     # Template of questions to ask user
     check_questions = [
         {
@@ -328,10 +295,19 @@ def configure(token, customerid=None):
     setup_client = _utils.inquirer_confirm(message)
 
     if setup_client:
-        # If the user didn't download a client file and we got to this point, download it anyways
-        if not isfile(CLIENT_ZIP):
-            print("Client required to configure. Downloading")
+        # Asks user if they want to download the zip file again if it exists
+        if isfile(CLIENT_ZIP):
+            message = 'Client exists. Do you want to download a fresh copy?'
+            get_again = _utils.inquirer_confirm(message)
+
+            if get_again:
+                downloaded = _utils.download_file(CLIENTS_URL, CLIENT_ZIP)
+            else:
+                # Set to true because the file already exists
+                downloaded = True
+        else:
             downloaded = _utils.download_file(CLIENTS_URL, CLIENT_ZIP)
+            print("File downloaded")
 
         # Configures the client
         # Returns the path to where the client was stored and os
