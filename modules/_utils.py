@@ -28,8 +28,7 @@ def get_user_token(config, conf_ini):
     try:
         token = config['main']['token']
     except KeyError:
-        config['main'] = {'token': ''}
-        config['main'] = {'customerid': ''}
+        config['main'] = {'token': '', 'customerid': ''}
         write_config(config, conf_ini)
 
         token = config['main']['token']
@@ -275,8 +274,6 @@ def create_win_schedule(_dir, client, interval, label):
             full_path.insert(1, ':')
             full_path = ''.join(full_path)
 
-        task = "schtasks /create /tn \'{0}\' /sc minute /mo {1} /ru System /tr \'PowerShell -NoLogo -WindowStyle hidden {2}\'".format(
-            label, interval, full_path)
     elif client == 'Python' or client == 'Python3':
         filename = "NodePing{0}PUSH/NodePingPythonPUSH.py".format(client)
         full_path = join(_dir, filename)
@@ -288,8 +285,17 @@ def create_win_schedule(_dir, client, interval, label):
             full_path.insert(1, ':')
             full_path = ''.join(full_path)
 
-        task = "schtasks /create /tn \'{0}\' /sc minute /mo {1} /ru System /tr \'PowerShell -NoLogo -WindowStyle hidden {2} {3}\'".format(
-            label, interval, client.lower(), full_path)
+    task = "$executable = 'python.exe {0}'\n".format(full_path)
+    task += "$taskname = '{0}'\n".format(label)
+    task += "$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).Date -RepetitionDuration (New-TimeSpan -Days 10000) -RepetitionInterval (New-TimeSpan -Minutes {0})\n".format(
+        interval)
+    task += "$settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -Hidden\n"
+    task += 'Register-ScheduledTask -TaskName $taskname -Trigger $trigger -Action $action -Setting $settings -User "NT AUTHORITY\SYSTEM" -RunLevel 1'
+    task += "Set-ScheduledTask $taskname -Trigger $trigger\n"
+
+    with open('windows_task.ps1', 'w') as f:
+        f.write("# Run this script to create a Windows Scheduled task\n")
+        f.write(task)
 
     return task
 

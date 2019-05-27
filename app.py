@@ -37,9 +37,10 @@ def created_check(info):
     print(output)
     pprint(fields)
 
-    if job and "schtasks" in job:
-        print("\nRun this command in your Windows PowerShell:\n")
+    if job and "Set-ScheduledTask" in job:
+        print("\nRun these commands in your Windows PowerShell as the administrator:\n")
         print("{0}\n".format(job))
+        print("Or run the created windows_task.ps1 PowerShell script as administrator\n\n")
     elif job:
         print("\nEnter this cron line to run the client at your specified interval:\n")
         print("{0}\n".format(job))
