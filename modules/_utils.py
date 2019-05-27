@@ -3,6 +3,7 @@
 
 import paramiko
 import urllib.request
+from getpass import getuser
 from os import name as os_name
 from os.path import isdir, isfile, join
 from PyInquirer import prompt, Validator, ValidationError
@@ -258,6 +259,8 @@ def create_win_schedule(_dir, client, interval, label):
     """ Creates a Windows scheduled task
     """
 
+    user = getuser()
+
     if label == "":
         label = "check"
 
@@ -267,6 +270,7 @@ def create_win_schedule(_dir, client, interval, label):
         filename = "NodePingPowerShellPUSH/NodePingPUSH.ps1"
         full_path = join(_dir, filename)
         full_path = full_path.replace('/', '\\')
+        called_client = "powershell.exe"
 
         # If creating a Windows client on a POSIX OS, fix the path
         if os_name == 'posix':
@@ -278,6 +282,7 @@ def create_win_schedule(_dir, client, interval, label):
         filename = "NodePing{0}PUSH/NodePingPythonPUSH.py".format(client)
         full_path = join(_dir, filename)
         full_path = full_path.replace('/', '\\')
+        called_client = "python.exe"
 
         # If creating a Windows client on a POSIX OS, fix the path
         if os_name == 'posix':
@@ -285,13 +290,18 @@ def create_win_schedule(_dir, client, interval, label):
             full_path.insert(1, ':')
             full_path = ''.join(full_path)
 
-    task = "$executable = 'python.exe {0}'\n".format(full_path)
+    task = "$client = (Get-Command {0}).Path\n".format(called_client)
+    task += "$executable = \"$client\"\n"
+    task += "$argument = '{0}'\n".format(full_path)
     task += "$taskname = '{0}'\n".format(label)
+    task += "$principal = New-ScheduledTaskPrincipal -LogonType 'S4U' -UserId \"{0}\"\n".format(
+        user)
+    task += "$action = New-ScheduledTaskAction -execute $executable -Argument $argument\n"
     task += "$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).Date -RepetitionDuration (New-TimeSpan -Days 10000) -RepetitionInterval (New-TimeSpan -Minutes {0})\n".format(
         interval)
     task += "$settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -Hidden\n"
-    task += 'Register-ScheduledTask -TaskName $taskname -Trigger $trigger -Action $action -Setting $settings -User "NT AUTHORITY\SYSTEM" -RunLevel 1'
-    task += "Set-ScheduledTask $taskname -Trigger $trigger\n"
+    task += 'Register-ScheduledTask -TaskName $taskname -Trigger $trigger -Action $action -Setting $settings -RunLevel 1\n'
+    task += "Set-ScheduledTask $taskname -Trigger $trigger -Principal $principal\n"
 
     with open('windows_task.ps1', 'w') as f:
         f.write("# Run this script to create a Windows Scheduled task\n")
