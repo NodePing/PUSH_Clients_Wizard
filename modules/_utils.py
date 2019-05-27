@@ -255,11 +255,12 @@ def create_cron(_dir, client, interval, label):
     return cron
 
 
-def create_win_schedule(_dir, client, interval, label):
+def create_win_schedule(user, _dir, client, interval, label):
     """ Creates a Windows scheduled task
     """
 
-    user = getuser()
+    if not user:
+        user = getuser()
 
     if label == "":
         label = "check"

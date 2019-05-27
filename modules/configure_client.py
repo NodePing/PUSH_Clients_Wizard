@@ -243,7 +243,21 @@ def _place_client(src, dest, client, _id):
             try:
                 transport = paramiko.Transport((host, port))
             except paramiko.ssh_exception.SSHException:
-                print("Unable to connect. Try again")
+                input("Unable to connect. Press enter to continue")
+
+                # TODO: ask user if they want to reconnect on fail
+                # reconnect = [
+                #     {
+                #         'type': 'confirm',
+                #         'name': 'reconnect',
+                #         'message': 'Do you want to try to reconnect?'
+                #     }
+                # ]
+
+                # connect_answer = _utils.inquirer_confirm(reconnect)
+
+                # if not connect_answer['reconnect']:
+                #     return answers['remote_os']
                 return answers['remote_os']
 
             if answers['use_password'] == 'password':
@@ -999,6 +1013,8 @@ def main(metrics, client_zip, client):
     os = _place_client(unarchived, final_destination, client, check_id)
 
     if '@' in final_destination:
-        return {'dest': final_destination.split('@')[1].split(':')[1], 'os': os}
+        dest = final_destination.split('@')[1].split(':')[1]
+        user = final_destination.split('@')[0]
+        return {'user': user, 'dest': dest, 'os': os}
     else:
-        return {'dest': final_destination, 'os': os}
+        return {'user': '', 'dest': final_destination, 'os': os}
