@@ -14,7 +14,7 @@ def disable_by_label(token, label, disable=False, customerid=None):
     customerid if the check is a part of a subaccount
     """
 
-    check_token.main(token)
+    check_token.is_valid(token)
 
     if disable:
         disable = "true"
@@ -39,7 +39,7 @@ def disable_by_target(token, target, disable=False, customerid=None):
     customerid if the check is a part of a subaccount
     """
 
-    check_token.main(token)
+    check_token.is_valid(token)
 
     if disable:
         disable = "true"
@@ -64,7 +64,7 @@ def disable_by_type(token, _type, disable=False, customerid=None):
     customerid if the check is a part of a subaccount
     """
 
-    check_token.main(token)
+    check_token.is_valid(token)
 
     if disable:
         disable = "true"
@@ -89,7 +89,7 @@ def disable_all(token, disable=False, customerid=None):
     customerid if the check is a part of a subaccount
     """
 
-    check_token.main(token)
+    check_token.is_valid(token)
 
     if disable:
         disable = "true"

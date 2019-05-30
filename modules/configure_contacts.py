@@ -152,8 +152,6 @@ def main(token, customerid=None):
     and alert times will be used for check
     """
 
-    query_nodeping = get_contacts.GetContacts(token, customerid)
-
     # All availavle schedules to user
     all_schedules = ["All the time"]
 
@@ -164,7 +162,7 @@ def main(token, customerid=None):
     for key, value in cust_schedules.items():
         all_schedules.append(key)
 
-    contacts = query_nodeping.get_all()
+    contacts = get_contacts.get_all(token)
 
     contacts = format_contacts(contacts)
 

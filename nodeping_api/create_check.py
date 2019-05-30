@@ -24,7 +24,7 @@ def _create_url(token, customerid):
     customerid is None
     """
 
-    check_token.main(token)
+    check_token.is_valid(token)
 
     if customerid:
         url = "{0}checks?token={1}&customerid={2}".format(

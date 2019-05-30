@@ -13,7 +13,7 @@ def get_all(token, customerid=None):
     original JSON that is gathered from NodePing
     """
 
-    check_token.main(token)
+    check_token.is_valid(token)
 
     if customerid:
         url = "{0}contacts?token={1}&customerid={2}".format(
@@ -24,53 +24,30 @@ def get_all(token, customerid=None):
     return _query_nodeping_api.get(url)
 
 
-class GetContacts:
-    def __init__(self, token, customerid=None, contacttype=None):
-        self.token = token
-        self.customerid = customerid
-        self.contacttype = contacttype
+def get_by_type(token, contacttype, customerid=None):
+    """ Get a contact based on its type, such as email, sms, webhook
 
-        check_token.main(self.token)
+    Returns all the data in a dictionary format from the originl
+    JSON that is gathered from NodePing.
+    """
 
-    def get_all(self):
-        """ Gets all contacts that exist for the account
+    contact_dict = {}
 
-        Returns all the data in a dictionary format from the
-        original JSON that is gathered from NodePing
-        """
+    if customerid:
+        url = "{0}contacts?token={1}&customerid={2}".format(
+            API_URL, token, customerid)
+    else:
+        url = "{0}contacts?token={1}".format(API_URL, token)
 
-        if self.customerid:
-            url = "{0}contacts?token={1}&customerid={2}".format(
-                API_URL, self.token, self.customerid)
-        else:
-            url = "{0}contacts?token={1}".format(API_URL, self.token)
+    contacts = _query_nodeping_api.get(url)
 
-        return _query_nodeping_api.get(url)
+    for key, value in contacts.items():
+        _id = value['addresses']
 
-    def get_by_type(self):
-        """ Get a contact based on its type, such as email, sms, webhook
+        for contact_id, details in _id.items():
+            _type = details['type']
 
-        Returns all the data in a dictionary format from the originl
-        JSON that is gathered from NodePing.
-        """
+            if _type == contacttype:
+                contact_dict.update({key: value})
 
-        contact_dict = {}
-
-        if self.customerid:
-            url = "{0}contacts?token={1}&customerid={2}".format(
-                API_URL, self.token, self.customerid)
-        else:
-            url = "{0}contacts?token={1}".format(API_URL, self.token)
-
-        contacts = _query_nodeping_api.get(url)
-
-        for key, value in contacts.items():
-            _id = value['addresses']
-
-            for contact_id, details in _id.items():
-                _type = details['type']
-
-                if _type == self.contacttype:
-                    contact_dict.update({key: value})
-
-        return contact_dict
+    return contact_dict

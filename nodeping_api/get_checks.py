@@ -13,7 +13,7 @@ class GetChecks:
         self.customerid = customerid
 
         # Checks to see if the API token provided is valid
-        check_token.main(self.token)
+        check_token.is_valid(self.token)
 
     def all_checks(self):
         """ Gets all checks that exist for the account
@@ -43,12 +43,19 @@ class GetChecks:
 
         passing_checks = {}
 
-        url = "{0}checks?token={1}".format(API_URL, self.token)
+        if self.customerid:
+            url = "{0}checks?token={1}&customerid={2}".format(
+                API_URL, self.token, self.customerid)
+        else:
+            url = "{0}checks?token={1}".format(API_URL, self.token)
 
         all_checks_dictionary = _query_nodeping_api.get(url)
 
         for check_id, contents in all_checks_dictionary.items():
-            state = contents['state']
+            try:
+                state = contents['state']
+            except KeyError:
+                state = 0
 
             if state == 1:
                 passing_checks.update({check_id: contents})
@@ -59,19 +66,28 @@ class GetChecks:
         """ Gets all checks for the account that are failing
 
         Makes a request to NodePing with the supplied API key.
-        Queries NodePing for current events for the check.
+        Queries NodePing for current failing checks.
         """
 
         failing_checks = {}
 
-        url = "{0}results/current?token={1}".format(API_URL, self.token)
+        if self.customerid:
+            url = "{0}checks?token={1}&customerid={2}".format(
+                API_URL, self.token, self.customerid)
+        else:
+            url = "{0}checks?token={1}".format(API_URL, self.token)
 
-        events_checks = _query_nodeping_api.get(url)
+        url = "{0}checks?token={1}".format(API_URL, self.token)
 
-        for check_id, contents in events_checks.items():
-            _type = contents['type']
+        all_checks_dictionary = _query_nodeping_api.get(url)
 
-            if _type == 'down':
+        for check_id, contents in all_checks_dictionary.items():
+            try:
+                state = contents['state']
+            except KeyError:
+                state = 2
+
+            if state == 0:
                 failing_checks.update({check_id: contents})
 
         return failing_checks

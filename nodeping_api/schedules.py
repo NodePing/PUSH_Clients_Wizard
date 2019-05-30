@@ -21,7 +21,7 @@ def get_schedule(token, schedule=None, customerid=None):
     :rtype: dict
     """
 
-    check_token.main(token)
+    check_token.is_valid(token)
 
     if customerid and not schedule:
         url = "{0}schedules?token={1}&customerid={2}".format(
@@ -70,7 +70,7 @@ def create_schedule(token, data, schedule_name, customerid=None):
     allday: True/False - enables notifications for the entire day.
     """
 
-    check_token.main(token)
+    check_token.is_valid(token)
 
     if customerid:
         url = "{0}schedules/{1}?token={2}&customerid={3}".format(
@@ -115,7 +115,7 @@ def update_schedule(token, data, schedule_name, customerid=None):
     allday: True/False - enables notifications for the entire day.
     """
 
-    check_token.main(token)
+    check_token.is_valid(token)
 
     if customerid:
         url = "{0}schedules/{1}?token={2}&customerid={3}".format(
@@ -142,7 +142,7 @@ def delete_schedule(token, schedule, customerid=None):
     :rtype: dict
     """
 
-    check_token.main(token)
+    check_token.is_valid(token)
 
     if customerid:
         url = "{0}schedules/{1}?token={2}&customerid={3}".format(

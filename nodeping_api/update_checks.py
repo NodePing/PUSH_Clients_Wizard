@@ -18,7 +18,7 @@ def update(token, checkid, fields, customerid=None):
         # print("To update many checks, use the update_many method")
         raise(StrExpected)
 
-    check_token.main(token)
+    check_token.is_valid(token)
 
     if customerid:
         url = "{0}checks/{1}?token={2}&customerid={3}".format(
@@ -44,7 +44,7 @@ def update_many(token, checkids, fields, customerid=None):
         # raise("To update multiple checks, provide a list of Check IDs")
         raise(ListExpected)
 
-    check_token.main(token)
+    check_token.is_valid(token)
 
     for _id in checkids:
         if customerid:

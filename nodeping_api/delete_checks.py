@@ -10,7 +10,7 @@ def remove(token, checkid, customerid=None):
     """ Deletes a check with a give Check ID
     """
 
-    check_token.main(token)
+    check_token.is_valid(token)
 
     if customerid:
         url = "{0}checks/{1}?token={2}&customerid={3}".format(
