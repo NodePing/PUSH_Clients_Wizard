@@ -438,6 +438,13 @@ def fileage_metric(key_name):
         hours = answers['hours']
         minutes = answers['minutes']
 
+        if not days:
+            days = 0
+        elif not hours:
+            hours = 0
+        elif not minutes:
+            minutes = 0
+
         names.update(
             {key: {'name': name, 'days': days, 'hours': hours, 'minutes': minutes, 'min': 1, 'max': 1}})
 

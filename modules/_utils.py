@@ -157,10 +157,12 @@ def make_missing_dirs(sftp_client, remote_dir, remote_os):
     """
 
     if remote_os == "Windows":
-        remote_dir.replace("/", "\\")
+        remote_dir = nix_to_win_path(remote_dir)
 
         path_seperator = "\\"
     else:
+        remote_dir = win_to_other_path(remote_dir)
+
         path_seperator = "/"
 
     dirs = path_seperator
@@ -232,6 +234,7 @@ def create_cron(_dir, client, interval, label):
         return create_win_schedule(_dir, client, interval, label)
 
     full_path = join(_dir, filename)
+    full_path = win_to_other_path(full_path)
 
     if interval == 1:
         cron = "* * * * * %s" % full_path
@@ -270,7 +273,7 @@ def create_win_schedule(user, _dir, client, interval, label):
     if client == 'PowerShell':
         filename = "NodePingPowerShellPUSH/NodePingPUSH.ps1"
         full_path = join(_dir, filename)
-        full_path = full_path.replace('/', '\\')
+        full_path = nix_to_win_path(full_path)
         called_client = "powershell.exe"
 
         # If creating a Windows client on a POSIX OS, fix the path
@@ -282,7 +285,7 @@ def create_win_schedule(user, _dir, client, interval, label):
     elif client == 'Python' or client == 'Python3':
         filename = "NodePing{0}PUSH/NodePingPythonPUSH.py".format(client)
         full_path = join(_dir, filename)
-        full_path = full_path.replace('/', '\\')
+        full_path = nix_to_win_path(full_path)
         called_client = "python.exe"
 
         # If creating a Windows client on a POSIX OS, fix the path
@@ -309,6 +312,26 @@ def create_win_schedule(user, _dir, client, interval, label):
         f.write(task)
 
     return task
+
+
+def win_to_other_path(path):
+    """ Converts Windows \\ to /
+
+    When doing a join on Windows, it messes up the paths for *NIX.
+    This simply replaces the \\ to /
+    """
+
+    return path.replace('\\', '/')
+
+
+def nix_to_win_path(path):
+    """ Converts *NIX / to Windows \\
+
+    When doing a join on *NIX, it messes up the paths for Windows.
+    This simply replaces the / to \\
+    """
+
+    return path.replace('/', '\\')
 
 
 def get_interval(interval):

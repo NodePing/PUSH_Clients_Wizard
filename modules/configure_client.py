@@ -42,15 +42,17 @@ def _add_metric(archive_dir, client_path, name, client):
             client_path, 'NodePingPUSHClient/modules/{0}/{0}.sh\n'.format(name))
 
         string = "{0}={1}".format(name, metric_path)
-        print(string)
+
+        string = _utils.win_to_other_path(string)
 
         # Append the location of the module to the moduleconfig file
-        with open(filename, 'a') as f:
+        with open(filename, 'a', newline='\n') as f:
             f.write(string)
 
         # Make the module executable
         sh_script = join(
             archive_dir, "POSIX/NodePingPUSHClient/modules/{0}/{0}.sh".format(name))
+
         st = os.stat(sh_script)
         os.chmod(sh_script, st.st_mode | stat.S_IEXEC)
 
@@ -232,7 +234,6 @@ def _place_client(src, dest, client, _id):
                 }
             ]
 
-            # answers = prompt(ssh_questions)
             answers = _utils.confirm_choice(ssh_questions)
 
             if not answers['ssh_port']:
@@ -298,15 +299,29 @@ def _place_client(src, dest, client, _id):
             local_subdir = item[0]
             files = item[2]
 
-            sftp.mkdir(join(dirname, local_subdir))
+            make_dir = join(dirname, local_subdir)
+
+            if answers['remote_os'] == 'Windows':
+                make_dir = _utils.nix_to_win_path(make_dir)
+            else:
+                make_dir = _utils.win_to_other_path(make_dir)
+
+            sftp.mkdir(make_dir)
 
             for i in files:
                 src_file = join(local_subdir, i)
                 dest_file = join(dirname, src_file)
+
+                if answers['remote_os'] == 'Windows':
+                    dest_file = _utils.nix_to_win_path(dest_file)
+                else:
+                    dest_file = _utils.win_to_other_path(dest_file)
+
                 sftp.put(src_file, dest_file)
 
                 # Make remote shell scripts executable
-                sftp.chmod(dest_file, os.stat(src_file).st_mode)
+                if ".sh" in dest_file or ".py" in dest_file:
+                    sftp.chmod(dest_file, 0o750)
 
         sftp.close()
         transport.close()
@@ -398,13 +413,13 @@ def configure_checksum(keys, all_metrics, archive_dir, client):
         # Clear contents of checksum_type.txt file
         open(checksum_type_file, 'w').close()
 
-        with open(checksum_file, 'a') as f:
+        with open(checksum_file, 'a', newline='\n') as f:
             for key, value in hash_dict.items():
                 line = "{0} {1}\n".format(key, value['checksum'])
                 f.write(line)
 
         # Write the hashing algorithm type to file
-        with open(checksum_type_file, 'w') as f:
+        with open(checksum_type_file, 'w', newline='\n') as f:
             f.write(hash_dict[filename]['algorithm'].lower())
 
     elif client == 'Python' or client == 'Python3':
@@ -416,7 +431,7 @@ def configure_checksum(keys, all_metrics, archive_dir, client):
         # Clear contents of config.py file
         open(checksum_file, 'w').close()
 
-        with open(checksum_file, 'a') as f:
+        with open(checksum_file, 'a', newline='\n') as f:
             f.write("files = ")
             pprint(hash_dict, stream=f)
             f.write("\nhash_algorithm = \"{0}\"".format(algorithm.lower()))
@@ -460,7 +475,7 @@ def configure_checkpid(keys, all_metrics, archive_dir, client):
         # Clear contents of checkpid.txt file
         open(checkpid_file, 'w').close()
 
-        with open(checkpid_file, 'a') as f:
+        with open(checkpid_file, 'a', newline='\n') as f:
             for pidfile in filenames:
                 f.write("%s\n" % pidfile)
 
@@ -473,7 +488,7 @@ def configure_checkpid(keys, all_metrics, archive_dir, client):
         # Clear contents of config.py file
         open(checkpid_file, 'w').close()
 
-        with open(checkpid_file, 'w') as f:
+        with open(checkpid_file, 'w', newline='\n') as f:
             f.write("PIDFILES = ")
             f.write(str(filenames))
 
@@ -509,7 +524,7 @@ def configure_fileage(keys, all_metrics, archive_dir, client):
         # Clear contents of fileage.txt file
         open(fileage_file, 'w').close()
 
-        with open(fileage_file, 'a') as f:
+        with open(fileage_file, 'a', newline='\n') as f:
             for line in lines:
                 f.write("{0}\n".format(line))
 
@@ -532,7 +547,7 @@ def configure_fileage(keys, all_metrics, archive_dir, client):
         # Clear contents of the config.py file
         open(fileage_file, 'w').close()
 
-        with open(fileage_file, 'a') as f:
+        with open(fileage_file, 'a', newline='\n') as f:
             f.write("filenames = ")
             pprint(files, stream=f)
 
@@ -609,12 +624,12 @@ def configure_mysqlstat(archive_dir, client):
         vars_file = join(mysqlstat_dir, "variables.sh")
 
         if not querystring:
-            with open(vars_file, 'r') as f:
+            with open(vars_file, 'r', newline='\n') as f:
                 for line in f:
                     if "querystring" in line:
                         querystring = line.split('=')[1]
 
-        with open(vars_file, 'w') as f:
+        with open(vars_file, 'w', newline='\n') as f:
             f.write("username=\"%s\"\n" % username)
             f.write("password=\"%s\"\n" % password)
             f.write("host=\"%s\"\n" % host)
@@ -637,7 +652,7 @@ def configure_mysqlstat(archive_dir, client):
 
         mysqlstat_file = join(mysqlstat_dir, "config.py")
 
-        with open(mysqlstat_file, 'w') as f:
+        with open(mysqlstat_file, 'w', newline='\n') as f:
             f.write("username = \'%s\'\n" % username)
             if not host:
                 f.write("host = \'localhost\'\n")
@@ -695,12 +710,12 @@ def configure_pgsqlstat(archive_dir, client):
         vars_file = join(pgsqlstat_dir, "variables.sh")
 
         if not querystring:
-            with open(vars_file, 'r') as f:
+            with open(vars_file, 'r', newline='\n') as f:
                 for line in f:
                     if "querystring" in line:
                         querystring = line.split('=')[1]
 
-        with open(vars_file, 'w') as f:
+        with open(vars_file, 'w', newline='\n') as f:
             f.write("username=\"%s\"\n" % username)
             f.write("querystring=%s" % querystring)
     else:
@@ -753,7 +768,7 @@ def configure_pingstatus(keys, all_metrics, archive_dir, client):
 
         hosts = ' '.join(hosts)
 
-        with open(pingstatus_file, 'w') as f:
+        with open(pingstatus_file, 'w', newline='\n') as f:
             f.write("ping_hosts=\"%s\"\n" % hosts)
             f.write("ping_count=%s\n" % ping_count)
             f.write("timeout=%s\n" % timeout)
@@ -764,7 +779,7 @@ def configure_pingstatus(keys, all_metrics, archive_dir, client):
 
         pingstatus_file = join(pingstatus_dir, "config.py")
 
-        with open(pingstatus_file, 'w') as f:
+        with open(pingstatus_file, 'w', newline='\n') as f:
             f.write("ping_hosts = %s\n" % str(hosts))
             f.write("ping_count = \"%s\"\n" % ping_count)
             f.write("timeout = \"%s\"\n" % timeout)
@@ -815,7 +830,7 @@ def configure_redismaster(archive_dir, client):
             archive_dir)
         vars_file = join(redismaster_dir, "variables.sh")
 
-        with open(vars_file, 'r') as f:
+        with open(vars_file, 'r', newline='\n') as f:
             filedata = f.read()
 
         filedata = filedata.replace(
@@ -826,7 +841,7 @@ def configure_redismaster(archive_dir, client):
             'sentinel_ip=""', 'sentinel_ip="%s"' % sentinel_ip)
         filedata = filedata.replace('port=""', 'port="%s"' % port)
 
-        with open(vars_file, 'w') as f:
+        with open(vars_file, 'w', newline='\n') as f:
             f.write(filedata)
 
     elif client == 'Python' or client == 'Python3':
@@ -835,7 +850,7 @@ def configure_redismaster(archive_dir, client):
 
         redismaster_file = join(redismaster_dir, "config.py")
 
-        with open(redismaster_file, 'r') as f:
+        with open(redismaster_file, 'r', newline='\n') as f:
             filedata = f.read()
 
         filedata = filedata.replace('REDIS_MASTER = ""',
@@ -849,7 +864,7 @@ def configure_redismaster(archive_dir, client):
 
         filedata = filedata.replace('PORT = ""', 'PORT = "%s"' % port)
 
-        with open(redismaster_file, 'w') as f:
+        with open(redismaster_file, 'w', newline='\n') as f:
             f.write(filedata)
 
 
@@ -861,7 +876,7 @@ def insert_checktoken(checktoken, _id, unarchived, save_path, client):
         configfile = join(
             unarchived, 'POSIX/NodePingPUSHClient/NodePingPUSH.sh')
 
-        with open(configfile, 'r') as f:
+        with open(configfile, 'r', newline='\n') as f:
             filedata = f.read()
 
         moduleconfig = '/full/path/to/moduleconfig'
@@ -882,7 +897,7 @@ def insert_checktoken(checktoken, _id, unarchived, save_path, client):
         filedata = filedata.replace(
             logfile, "{0}/NodePingPUSH.log".format(full_path))
 
-        with open(configfile, 'w') as f:
+        with open(configfile, 'w', newline='\n') as f:
             f.write(filedata)
 
     elif client == 'Python' or client == 'Python3':
@@ -919,11 +934,13 @@ def client_set_executable(path, client):
         # Make Python script executable
         py_script = join(
             path, "{0}/NodePing{0}PUSH/NodePingPythonPUSH.py".format(client))
+
         st = os.stat(py_script)
         os.chmod(py_script, st.st_mode | stat.S_IEXEC)
     elif client == 'POSIX':
         # Make POSIX script executable
         sh_script = join(path, "POSIX/NodePingPUSHClient/NodePingPUSH.sh")
+
         st = os.stat(sh_script)
         os.chmod(sh_script, st.st_mode | stat.S_IEXEC)
 
