@@ -766,6 +766,21 @@ def pingstatus_metric(key_name):
     return hosts
 
 
+def ip_addrs_metric(key_name):
+    """
+    """
+
+    ip_fields = {
+        'ip_addrs': {
+            'name': 'ip_addrs',
+            'min': 1,
+            'max': 1
+        }
+    }
+
+    return ip_fields
+
+
 def zfs_metric(key_name):
     """ Set min/max values on free space for zfs datasets
     """
@@ -870,6 +885,8 @@ def main(metrics, client):
             data = apcupsd_metric('apcupsd')
         elif 'redismaster' in metric:
             data = redismaster_metric('redismaster')
+        elif 'ip_addrs' in metric:
+            data = ip_addrs_metric('ip_addrs')
 
         end_metric(metric)
 

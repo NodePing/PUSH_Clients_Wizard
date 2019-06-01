@@ -868,6 +868,55 @@ def configure_redismaster(archive_dir, client):
             f.write(filedata)
 
 
+def configure_ip_addrs(archive_dir, client):
+    """ Sets up the client configuration for ip_addrs metric
+
+    Asks the user for IP addresses that they except to be on their system.
+    If any other IP appears, they will be alerted.
+    """
+
+    VAR_NAME = 'acceptable_ips'
+
+    host_ips = []
+
+    adding_ips = True
+    complete = False
+
+    while not complete:
+        while adding_ips:
+            check_questions = [
+                {
+                    'type': 'input',
+                    'name': 'ip',
+                    'message': 'Allowed IP address'
+                },
+                {
+                    'type': 'confirm',
+                    'name': 'adding_ips',
+                    'message': 'Add another IP address'
+                }
+            ]
+
+            check_answers = prompt(check_questions)
+
+            host_ips.append(check_answers['ip'])
+            adding_ips = check_answers['adding_ips']
+
+        print(str(host_ips))
+
+        complete = _utils.inquirer_confirm("Are these IP addresses correct?")
+
+    if client == 'POSIX':
+        ip_addrs_dir = "{0}/POSIX/NodePingPUSHClient/modules/ip_addrs".format(
+            archive_dir)
+        vars_file = join(ip_addrs_dir, "variables.sh")
+
+        ips = ' '.join(host_ips)
+
+        with open(vars_file, 'w', newline='\n') as f:
+            f.write("{0}='{1}'\n".format(VAR_NAME, ips))
+
+
 def insert_checktoken(checktoken, _id, unarchived, save_path, client):
     """ Places the checktoken in the client's config file
     """
@@ -1014,6 +1063,9 @@ def main(metrics, client_zip, client):
 
         elif name == 'redismaster':
             configure_redismaster(unarchived, client)
+
+        elif name == 'ip_addrs':
+            configure_ip_addrs(unarchived, client)
 
         _add_metric(unarchived, final_destination, name, client)
 

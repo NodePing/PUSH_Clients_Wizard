@@ -12,6 +12,7 @@ posix_metrics = [
     'MySQL query (mysqlstat)',
     'PostgreSQL query (pgsqlstat)',
     'Host ping status (pingstatus)',
+    'Host IP status (ip_addrs)',
     'Load averages (processor)',
     'Redis Master monitor (redismaster)',
     'ZFS Dataset Freespace (zfs)'
