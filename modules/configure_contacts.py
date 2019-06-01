@@ -76,7 +76,7 @@ def choose_contacts(contact_dict, cust_schedules):
                 add_contacts = False
 
             for key, value in contact_dict.items():
-                if value['name'] in answers['contact']:
+                if value['address'] in answers['contact']:
                     if answers['delay'] == 'Immediate':
                         delay = 0
                     else:
@@ -104,11 +104,12 @@ def choose_contacts(contact_dict, cust_schedules):
         for i in user_contacts:
             for key in i:
                 name = contact_dict[key]['name']
+                address = contact_dict[key]['address']
                 delay = i[key]['delay']
                 schedule = i[key]['schedule']
 
-            print("{0}: Delay: {1}  Schedule: {2}".format(
-                name, delay, schedule))
+            print("{0} {1}: Delay: {2}  Schedule: {3}".format(
+                name, address, delay, schedule))
 
         if len(user_contacts) == 0:
             print("Contacts: None")
@@ -134,7 +135,12 @@ def format_contacts(contacts):
 
     for key, value in contacts.items():
         _id = value['addresses']
-        name = value['name']
+
+        # Sometimes the name in a contact may not exist
+        try:
+            name = value['name']
+        except KeyError:
+            name = "(empty)"
 
         for contact_id, details in _id.items():
             address = details['address']
