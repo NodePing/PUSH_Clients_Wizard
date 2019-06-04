@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from PyInquirer import prompt
-from nodeping_api import get_contacts, schedules
+from nodeping_api import get_contacts, group_contacts, schedules
 
 from . import _utils
 
@@ -87,6 +87,11 @@ def choose_contacts(contact_dict, cust_schedules):
                     else:
                         schedule = answers['schedule']
 
+                    # Needed to properly add contact groups
+                    if value['address'] == 'Group':
+                        if value['name'] not in answers['contact']:
+                            continue
+
                     info = {key: {"delay": delay,
                                   "schedule": schedule}}
 
@@ -134,9 +139,15 @@ def format_contacts(contacts):
     contacts_dict = {}
 
     for key, value in contacts.items():
-        _id = value['addresses']
+        try:
+            _id = value['addresses']
+        # Exception means it is a group contact
+        except KeyError:
+            contacts_dict.update(
+                {key: {'name': value['name'], 'address': 'Group'}})
+            continue
 
-        # Sometimes the name in a contact may not exist
+        # Add a single contact to the dictionary
         try:
             name = value['name']
         except KeyError:
@@ -168,7 +179,9 @@ def main(token, customerid=None):
     for key, value in cust_schedules.items():
         all_schedules.append(key)
 
-    contacts = get_contacts.get_all(token)
+    contacts = get_contacts.get_all(token, customerid=customerid)
+    contactgroups = group_contacts.get_all(token, customerid=customerid)
+    contacts.update(contactgroups)
 
     contacts = format_contacts(contacts)
 

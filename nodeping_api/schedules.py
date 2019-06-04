@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from . import check_token, _query_nodeping_api
+from . import check_token, _query_nodeping_api, config
 
-API_URL = 'https://api.nodeping.com/api/1/'
+API_URL = config.API_URL
 
 
 def get_schedule(token, schedule=None, customerid=None):
@@ -17,6 +17,8 @@ def get_schedule(token, schedule=None, customerid=None):
     :type token: str
     :param schedule: The name of the notification schedule
     :type schedule: str
+    :param customerid: (optional) ID for subaccount
+    :type customerid: str
     :return: Response from NodePing
     :rtype: dict
     """
@@ -48,6 +50,8 @@ def create_schedule(token, data, schedule_name, customerid=None):
     :type token: str
     :param data: The schedules for each day to receive notifications
     :type dict
+    :param customerid: (optional) ID for subaccount
+    :type customerid: str
     :return: Schedule ID and if the operation was completed or not
     :rtype: dict
 
@@ -89,10 +93,12 @@ def update_schedule(token, data, schedule_name, customerid=None):
     for the specified user account. Returns the results from NodePing
     in a dictionary format.
 
-    :param: token: The NodePing APi token for the account
+    :param: token: The NodePing API token for the account
     :type token: str
     :param data: The schedules for each day to receive notifications
     :type dict
+    :param customerid: (optional) ID for subaccount
+    :type customerid: str
     :return: Schedule ID and if the operation was completed or not
     :rtype: dict
 

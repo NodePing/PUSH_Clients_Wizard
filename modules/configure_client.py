@@ -268,6 +268,8 @@ def _place_client(src, dest, client, _id):
 
                 except paramiko.ssh_exception.AuthenticationException:
                     print("SSH authentication failed. Not copying files. Continuing")
+                except paramiko.ssh_exception.SSHException:
+                    print("SSH Authentication issue. No acceptable MACs")
                 else:
                     connected = True
 
@@ -998,6 +1000,9 @@ def main(metrics, client_zip, client):
     """ Configures the client config file and metrics files
     to contain the necessary information to run
     """
+
+    _utils.seperator()
+    print("\nConfiguring client metrics\n")
 
     completed_checks = []
 

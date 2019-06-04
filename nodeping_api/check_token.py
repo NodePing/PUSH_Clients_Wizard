@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from . import _query_nodeping_api
+from . import _query_nodeping_api, config
 
-API_URL = 'https://api.nodeping.com/api/1/'
+API_URL = config.API_URL
 
 
 def info(token, customerid=None):
