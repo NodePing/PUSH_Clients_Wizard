@@ -113,7 +113,7 @@ configured and set in your designated location. You will also be provided
 with a cron job you can enter if you set the client up to run on a *NIX
 system.
 
-If you chose to run on Windows, the commands to run are output
+If you chose to install the client on Windows, the commands to run are output
 to console. In addition, a .ps1 script is also created in the directory
 this program is running from and you can optionally run that instead of
 copying/pasting lines to set up a Task Scheduler event. Please note,
