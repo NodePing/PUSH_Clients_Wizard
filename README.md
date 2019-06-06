@@ -68,8 +68,8 @@ supply it.
 To run the program, open a command line or PowerShell and call start the
 program by running `python3 app.py` from the directory of the program.
 
-You will be prompted to enter 'l' to list checks, 'c' to create checks,
-'d' to delete checks, or 'e' to exit the program.
+You will be prompted to either list checks, create checks,
+delete checks, or exit the program.
 
 #### Listing Checks
 
@@ -85,24 +85,20 @@ Here you are asked multiple things to setup a check
 
   - The client you will be using (POSIX, PowerShell, Python, Python3)
 
-  - If you wish to configure the client or not
-
   - The metrics you will be checking
 
   - Data about each metric that will be used to Pass/Fail the check
 
   - Your contacts that will be alerted if the check fails
+  
+  - If you wish to configure the client or not
 
   - Where to save the client to (whether remote or local)
 
   - Information to set up the metric for the PUSH client
 
   - If the client will be set up remotely: your ssh login info
-
-Once the process is done, the check will be configured with NodePing,
-and, if you accepted to setting up the client, the client will be
-configured and set in your designated location.
-
+  
 > **Note**
 > 
 > When configuring some metrics, it will confirm the information that
@@ -110,6 +106,19 @@ configured and set in your designated location.
 > NodePing. For other values that are previously entered (such as
 > checksums), values you entered will still be visible to you to
 > confirm.
+
+Once the process is done, the check will be configured with NodePing,
+and, if you accepted to setting up the client, the client will be
+configured and set in your designated location. You will also be provided
+with a cron job you can enter if you set the client up to run on a *NIX
+system.
+
+If you chose to run on Windows, the commands to run are output
+to console. In addition, a .ps1 script is also created in the directory
+this program is running from and you can optionally run that instead of
+copying/pasting lines to set up a Task Scheduler event. Please note,
+these commands have to be run as an administrator to set up the event.
+
 
 #### Deleting Checks
 
