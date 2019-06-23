@@ -383,6 +383,21 @@ def checksum_metric(key_name, client=None):
         return files
 
 
+def dnslookup_metric(key_name):
+    """ Sets the minimum and maximum for dnslookup to be only 1 for passing
+
+    """
+    dnslookup_fields = {
+        'dnslookup': {
+            'name': 'dnslookup',
+            'min': 1,
+            'max': 1
+        }
+    }
+
+    return dnslookup_fields
+
+
 def drives_metric(key_name):
     """ Collects drive names/mountpoints and a min/max capacity
     """
@@ -887,6 +902,8 @@ def main(metrics, client):
             data = redismaster_metric('redismaster')
         elif 'ip_addrs' in metric:
             data = ip_addrs_metric('ip_addrs')
+        elif 'dnslookup' in metric:
+            data = dnslookup_metric('dnslookup')
 
         end_metric(metric)
 

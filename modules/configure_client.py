@@ -11,7 +11,7 @@ import zipfile
 import os
 import paramiko
 import stat
-from distutils.dir_util import copy_tree, mkpath
+from distutils.dir_util import copy_tree
 from PyInquirer import prompt
 from os.path import expanduser, isfile, join, split as path_split
 from pprint import pprint
@@ -877,6 +877,10 @@ def configure_ip_addrs(archive_dir, client):
     If any other IP appears, they will be alerted.
     """
 
+    _utils.seperator()
+    print("\n=====Configuring the ip_addrs metric=====")
+
+
     VAR_NAME = 'acceptable_ips'
 
     host_ips = []
@@ -917,6 +921,140 @@ def configure_ip_addrs(archive_dir, client):
 
         with open(vars_file, 'w', newline='\n') as f:
             f.write("{0}='{1}'\n".format(VAR_NAME, ips))
+    elif client == 'Python' or client == 'Python3':
+        ip_addrs_dir = "{0}/{1}/NodePing{1}PUSH/metrics/ip_addrs".format(
+            archive_dir, client)
+
+        ip_addrs_file = join(ip_addrs_dir, "config.py")
+
+        with open(ip_addrs_file, 'r', newline='\n') as f:
+            filedata = f.read()
+
+        filedata = filedata.replace('acceptable_addrs = ["192.168.0.16"]',
+                                    'acceptable_addrs = %s' % host_ips)
+
+        with open(ip_addrs_file, 'w', newline='\n') as f:
+            f.write(filedata)
+    elif client == 'PowerShell':
+        ip_addrs_dir = "{0}/{1}/NodePing{1}PUSH/modules/ip_addrs".format(
+            archive_dir, client)
+
+        ip_addrs_file = join(ip_addrs_dir, "ip_addrs.json")
+
+        # Clear contents of the ip_addrs.json file
+        open(ip_addrs_file, 'w').close()
+
+        with open(ip_addrs_file, 'w') as f:
+            f.write(json.dumps(host_ips, indent=8, sort_keys=True))
+
+
+def configure_dnslookup(archive_dir, client):
+    """ Sets up the client configuration for dnslookup metric
+
+    Asks user for the information to perform a DNS query, such as
+    the server to query, query, expected result, and record type
+    """
+
+
+    _utils.seperator()
+    print("\n=====Configuring the dnslookup metric=====")
+
+
+    # False if the user is still adding information. This will be true if
+    # the user says the info they input is correct
+    complete = False
+
+    while not complete:
+        check_questions = [
+            {
+                'type': 'input',
+                'name': 'dns_ip',
+                'message': 'IP address of the DNS server to query (optional)'
+            },
+            {
+                'type': 'input',
+                'name': 'to_resolve',
+                'message': 'Hostname or IP to resolve'
+            },
+            {
+                'type': 'input',
+                'name': 'record_type',
+                'message': 'Record type to query (A, AAAA, CNAME, etc.)'
+            }
+        ]
+
+        dns_answers = prompt(check_questions)
+
+        dns_results = []
+
+        # Remains true if the user is still adding IPs that are expected
+        # as output from DNS query
+        adding_ips = True
+
+        while adding_ips:
+            result_questions = [
+                {
+                    'type': 'input',
+                    'name': 'output',
+                    'message': 'Expected output'
+                },
+                {
+                    'type': 'confirm',
+                    'name': 'adding_ips',
+                    'message': 'Are there other expected results from the query?'
+                }
+            ]
+
+            result_answers = prompt(result_questions)
+
+            dns_results.append(result_answers['output'])
+            adding_ips = result_answers['adding_ips']
+
+        print("DNS Server IP: %s" % dns_answers['dns_ip'])
+        print("FQDN/IP to resolve: %s" % dns_answers['to_resolve'])
+        print("Query type: %s" % dns_answers['record_type'])
+        print("Expected results: %s " % str(dns_results))
+
+        complete = _utils.inquirer_confirm("Are these IP addresses correct?")
+
+    if client == 'POSIX':
+        dnslookup_dir = "{0}/POSIX/NodePingPUSHClient/modules/dnslookup".format(
+            archive_dir)
+        vars_file = join(dnslookup_dir, "variables.sh")
+
+        results = ' '.join(dns_results)
+
+        with open(vars_file, 'w', newline='\n') as f:
+            f.write("# DNS server IP to query\n")
+            f.write("dns_ip='{0}'\n".format(dns_answers['dns_ip']))
+
+            f.write("\n# Hostname to resolve\n")
+            f.write("to_resolve='{0}'\n".format(dns_answers['to_resolve']))
+
+            f.write("\n# Expected IP or hostname as output.\n")
+            f.write("expected_output='{0}'\n".format(results))
+
+            f.write("record_type='{0}'".format(dns_answers['record_type']))
+    elif client == 'Python' or client == 'Python3':
+        dnslookup_dir = "{0}/{1}/NodePing{1}PUSH/metrics/dnslookup".format(
+            archive_dir, client)
+
+        dnslookup_file = join(dnslookup_dir, "config.py")
+
+        with open(dnslookup_file, 'r', newline='\n') as f:
+            filedata = f.read()
+
+        filedata = filedata.replace('dns_ip = "64.34.204.155"',
+                                    'dns_ip = "%s"' % dns_answers['dns_ip'])
+        filedata = filedata.replace('to_resolve = "nodeping.com"',
+                                    'to_resolve = "%s"' % dns_answers['to_resolve'])
+        filedata = filedata.replace('expected_output = "167.114.101.137"',
+                                    'expected_output = %s' % str(dns_results))
+        filedata = filedata.replace('query_type = "A"',
+                                    'query_type = "%s"' % dns_answers['record_type'])
+
+        with open(dnslookup_file, 'w', newline='\n') as f:
+            f.write(filedata)
 
 
 def insert_checktoken(checktoken, _id, unarchived, save_path, client):
@@ -950,7 +1088,6 @@ def insert_checktoken(checktoken, _id, unarchived, save_path, client):
 
         with open(configfile, 'w', newline='\n') as f:
             f.write(filedata)
-
     elif client == 'Python' or client == 'Python3':
         configfile = join(
             unarchived, '{0}/NodePing{0}PUSH/config.ini'.format(client))
@@ -962,7 +1099,6 @@ def insert_checktoken(checktoken, _id, unarchived, save_path, client):
         config.set('server', 'checktoken', value=checktoken)
 
         _utils.write_config(config, configfile)
-
     elif client == 'PowerShell':
         configfile = join(
             unarchived, 'PowerShell/NodePingPowerShellPUSH/NodePingPUSH.ps1')
@@ -1071,6 +1207,9 @@ def main(metrics, client_zip, client):
 
         elif name == 'ip_addrs':
             configure_ip_addrs(unarchived, client)
+
+        elif name == 'dnslookup':
+            configure_dnslookup(unarchived, client)
 
         _add_metric(unarchived, final_destination, name, client)
 

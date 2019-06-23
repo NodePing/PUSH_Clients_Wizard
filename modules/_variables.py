@@ -1,6 +1,7 @@
 posix_metrics = [
     'UPS Monitoring (apcupsd)',
     'Cassandra Cluster Status (cassandra)',
+    'DNS Query (dnslookup)',
     'Iptables rules count (checkiptables)',
     'PF Firewall rules count (checkpf_firewall)',
     'PID monitor (checkpid)',
@@ -23,11 +24,13 @@ powershell_metrics = [
     'Disk Freespace (drives)',
     'File mtime status (fileage)',
     'Free Memory monitor (memory)',
-    'Load averages (processor)'
+    'Load averages (processor)',
+    'Host IP status (ip_addrs)'
 ]
 
 python_metrics = [
     'UPS Monitoring (apcupsd)',
+    'DNS Query (dnslookup)',
     'PID monitor (checkpid)',
     'File checksum monitor (checksum)',
     'Disk Freespace (diskfree)',
@@ -37,5 +40,6 @@ python_metrics = [
     'Free Memory monitor (memfree)',
     'MySQL query (mysqlstat)',
     'Host ping status (pingstatus)',
+    'Host IP status (ip_addrs)',
     'Redis Master monitor (redismaster)'
 ]
