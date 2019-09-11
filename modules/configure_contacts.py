@@ -69,6 +69,7 @@ def choose_contacts(contact_dict, cust_schedules):
             except KeyError:
                 add_another = False
 
+            # Return that no contacts were chosen
             if not answers['contact']:
                 return []
 
@@ -76,7 +77,7 @@ def choose_contacts(contact_dict, cust_schedules):
                 add_contacts = False
 
             for key, value in contact_dict.items():
-                if value['address'] in answers['contact']:
+                if value['name'] in answers['contact'] and value['address'] in answers['contact']:
                     if answers['delay'] == 'Immediate':
                         delay = 0
                     else:
@@ -106,6 +107,11 @@ def choose_contacts(contact_dict, cust_schedules):
 
         print("\n")
 
+        formatted_contacts = []
+        # For some duplicates to be removed, the accepted contacts needed
+        # to be put in a new list
+        returned_contacts = []
+
         for i in user_contacts:
             for key in i:
                 name = contact_dict[key]['name']
@@ -113,10 +119,16 @@ def choose_contacts(contact_dict, cust_schedules):
                 delay = i[key]['delay']
                 schedule = i[key]['schedule']
 
-            print("{0} {1}: Delay: {2}  Schedule: {3}".format(
-                name, address, delay, schedule))
+            print_contact = "{0} {1}: Delay: {2}  Schedule: {3}".format(
+                name, address, delay, schedule)
 
-        if len(user_contacts) == 0:
+            # Removing duplicates that have the same name and address
+            if print_contact not in formatted_contacts:
+                formatted_contacts.append(print_contact)
+                returned_contacts.append(i)
+                print(print_contact)
+
+        if not user_contacts:
             print("Contacts: None")
 
         get_confirmation = prompt(confirmation)
@@ -126,7 +138,7 @@ def choose_contacts(contact_dict, cust_schedules):
         else:
             _utils.seperator()
 
-    return user_contacts
+    return returned_contacts
 
 
 def format_contacts(contacts):
@@ -176,7 +188,7 @@ def main(token, customerid=None):
     cust_schedules = schedules.get_schedule(token, customerid=customerid)
 
     # Gets the names of the schedules
-    for key, value in cust_schedules.items():
+    for key, _value in cust_schedules.items():
         all_schedules.append(key)
 
     contacts = get_contacts.get_all(token, customerid=customerid)
