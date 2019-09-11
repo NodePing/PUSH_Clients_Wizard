@@ -1,26 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from . import _utils
 import configparser
-import cryptography.utils
 import distutils.errors
 import json
+import os
+import stat
 import sys
 import zipfile
-import os
-import paramiko
-import stat
 from distutils.dir_util import copy_tree
-from PyInquirer import prompt
-from os.path import expanduser, isfile, join, split as path_split
+from os.path import expanduser, isfile, join
+from os.path import split as path_split
 from pprint import pprint
-# Needed to silence paramiko deprecation warnings until paramiko
-# creates release for CryptographyDeprecationWarning
-import warnings
-warnings.simplefilter(
-    "ignore", cryptography.utils.CryptographyDeprecationWarning)
+import paramiko
+from PyInquirer import prompt
 
+from . import _utils
 
 CLIENT_UNZIPPED_DIR = 'PUSH_Clients-master'
 
@@ -880,7 +875,6 @@ def configure_ip_addrs(archive_dir, client):
     _utils.seperator()
     print("\n=====Configuring the ip_addrs metric=====")
 
-
     VAR_NAME = 'acceptable_ips'
 
     host_ips = []
@@ -955,10 +949,8 @@ def configure_dnslookup(archive_dir, client):
     the server to query, query, expected result, and record type
     """
 
-
     _utils.seperator()
     print("\n=====Configuring the dnslookup metric=====")
-
 
     # False if the user is still adding information. This will be true if
     # the user says the info they input is correct
