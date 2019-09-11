@@ -27,11 +27,13 @@ Requirements to use this tool:
 
 **NOTE**
 
+Be sure to be using the latest version of Paramiko. Older versions of
 Paramiko has limitations in which SSH keys are accepted. If you do not use
 one of its supported SSH key types, you will either have to copy files
 by authenticating with an SSH password or remote copying the files later.
+The latest version of Paramiko fixes these issues.
 
-Supported key types:
+Supported key types for Paramiko versions <2.5.0:
 
 - dsskey
 
