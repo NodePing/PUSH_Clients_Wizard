@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from . import _query_nodeping_api, config
@@ -8,6 +8,13 @@ API_URL = config.API_URL
 
 def info(token, customerid=None):
     """ Returns the info for your account
+
+    :type token: string
+    :param token: Your NodePing API token
+    :type customerid: string
+    :param customerid: Optional subaccount ID for your account
+    :return: Return contents from the NodePing query
+    :rtype: dict
     """
 
     if customerid:
@@ -23,6 +30,13 @@ def info(token, customerid=None):
 
 def is_valid(token, customerid=None):
     """ Returns if your API key is valid or not
+
+    :type token: string
+    :param token: Your NodePing API token
+    :type customerid: string
+    :param customerid: Optional subaccount ID for your account
+    :return: True/False if the token is valid or not
+    :rtype: bool
     """
 
     if customerid:
@@ -39,7 +53,3 @@ def is_valid(token, customerid=None):
         return True
     except TypeError:
         return False
-
-
-if __name__ == '__main__':
-    main()

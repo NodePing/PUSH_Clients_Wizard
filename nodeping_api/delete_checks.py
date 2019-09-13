@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from . import check_token, _query_nodeping_api, config
@@ -8,6 +8,15 @@ API_URL = config.API_URL
 
 def remove(token, checkid, customerid=None):
     """ Deletes a check with a give Check ID
+
+    :type token: string
+    :param token: API token from NodePing
+    :type checkid: string
+    :param checkid: ID of check that will be deleted
+    :type customerid: string
+    :param customerid: subaccount ID if check is on a subaccount
+    :rtype: dict
+    :return: Dictionary with response from NodePing about check removal
     """
 
     check_token.is_valid(token)

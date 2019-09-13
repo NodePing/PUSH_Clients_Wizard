@@ -506,6 +506,21 @@ def memory_metric(key_name):
     return {key_name: {'name': key_name, 'min': _min, 'max': _max}}
 
 
+def mongodbstat_metric(key_name):
+    """ Sets mongobdstat metric to fail if the query fails or doesn't match the output
+    """
+
+    mongodbstat_fields = {
+        'mongodbstat': {
+            'name': 'mongodbstat',
+            'min': 1,
+            'max': 1
+        }
+    }
+
+    return mongodbstat_fields
+
+
 def sqlstat_metric(key_name, client=None):
     """ Set the expected output of a MySQL/MariaDB database
     """
@@ -904,6 +919,8 @@ def main(metrics, client):
             data = ip_addrs_metric('ip_addrs')
         elif 'dnslookup' in metric:
             data = dnslookup_metric('dnslookup')
+        elif 'mongodbstat' in metric:
+            data = mongodbstat_metric('mongodbstat')
 
         end_metric(metric)
 

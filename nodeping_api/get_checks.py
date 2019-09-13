@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from . import check_token, _query_nodeping_api, config
@@ -8,6 +8,15 @@ API_URL = config.API_URL
 
 class GetChecks:
     def __init__(self, token, checkid=None, customerid=None):
+        """
+        :type token: string
+        :param token: NodePing API token
+        :type checkid: string
+        :param checkid: ID for check to retrieve data for
+        :type customerid: string
+        :param customerid: subaccount ID
+        """
+
         self.token = token
         self.checkid = checkid
         self.customerid = customerid
@@ -67,6 +76,8 @@ class GetChecks:
 
         Makes a request to NodePing with the supplied API key.
         Queries NodePing for current failing checks.
+
+        *NOTE* this will also include disabled checks
         """
 
         failing_checks = {}
@@ -76,8 +87,6 @@ class GetChecks:
                 API_URL, self.token, self.customerid)
         else:
             url = "{0}checks?token={1}".format(API_URL, self.token)
-
-        url = "{0}checks?token={1}".format(API_URL, self.token)
 
         all_checks_dictionary = _query_nodeping_api.get(url)
 

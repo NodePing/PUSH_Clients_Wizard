@@ -112,7 +112,6 @@ def list_checks(token, customerid=None):
         # If no oldresultfail, it is False
         try:
             oldresultfail = str(contents['parameters']['oldresultfail'])
-            print(oldresultfail)
         except KeyError:
             oldresultfail = False
 

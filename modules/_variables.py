@@ -10,6 +10,7 @@ posix_metrics = [
     'File mtime status (fileage)',
     'Iocage jail status (iocage)',
     'Free Memory monitor (memory)',
+    'MongoDB query (mongodbstat)',
     'MySQL query (mysqlstat)',
     'PostgreSQL query (pgsqlstat)',
     'Host ping status (pingstatus)',
@@ -25,7 +26,8 @@ powershell_metrics = [
     'File mtime status (fileage)',
     'Free Memory monitor (memory)',
     'Load averages (processor)',
-    'Host IP status (ip_addrs)'
+    'Host IP status (ip_addrs)',
+    'MongoDB query (mongodbstat)'
 ]
 
 python_metrics = [
@@ -37,6 +39,7 @@ python_metrics = [
     'File mtime status (fileage)',
     'Load averages (load)',
     'Memory Available monitor (memavail)',
+    'MongoDB query (mongodbstat)',
     'Free Memory monitor (memfree)',
     'MySQL query (mysqlstat)',
     'Host ping status (pingstatus)',

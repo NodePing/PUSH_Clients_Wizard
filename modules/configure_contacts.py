@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from PyInquirer import prompt
-from nodeping_api import get_contacts, group_contacts, schedules
+from nodeping_api import contacts, group_contacts, schedules
 
 from . import _utils
 
@@ -191,12 +191,12 @@ def main(token, customerid=None):
     for key, _value in cust_schedules.items():
         all_schedules.append(key)
 
-    contacts = get_contacts.get_all(token, customerid=customerid)
+    single_contacts = contacts.get_all(token, customerid=customerid)
     contactgroups = group_contacts.get_all(token, customerid=customerid)
-    contacts.update(contactgroups)
+    single_contacts.update(contactgroups)
 
-    contacts = format_contacts(contacts)
+    single_contacts = format_contacts(single_contacts)
 
-    contact_info = choose_contacts(contacts, all_schedules)
+    contact_info = choose_contacts(single_contacts, all_schedules)
 
     return contact_info
