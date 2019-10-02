@@ -141,7 +141,7 @@ def choose_contacts(contact_dict, cust_schedules):
     return returned_contacts
 
 
-def format_contacts(contacts):
+def format_contacts(user_contacts):
     """ Takes contacts from NodePing and formats the data
 
     Data is put into a new dictionary that will be used by
@@ -150,20 +150,21 @@ def format_contacts(contacts):
 
     contacts_dict = {}
 
-    for key, value in contacts.items():
-        try:
-            _id = value['addresses']
-        # Exception means it is a group contact
-        except KeyError:
-            contacts_dict.update(
-                {key: {'name': value['name'], 'address': 'Group'}})
-            continue
+    for key, value in user_contacts.items():
 
         # Add a single contact to the dictionary
         try:
             name = value['name']
         except KeyError:
             name = "(empty)"
+
+        try:
+            _id = value['addresses']
+        # Exception means it is a group contact
+        except KeyError:
+            contacts_dict.update(
+                {key: {'name': name, 'address': 'Group'}})
+            continue
 
         for contact_id, details in _id.items():
             address = details['address']
