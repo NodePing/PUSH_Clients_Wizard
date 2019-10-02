@@ -872,6 +872,8 @@ def main(metrics, client):
                 data = sqlstat_metric('pgsqlstat')
             elif 'processor' in metric:
                 data = processor_metric('processor', client)
+            elif 'cpuload' in metric:
+                data = processor_metric('cpuload', client)
             elif 'zfs' in metric:
                 data = zfs_metric('zfs')
             elif 'diskfree' in metric:

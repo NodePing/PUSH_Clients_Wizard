@@ -25,7 +25,7 @@ powershell_metrics = [
     'Disk Freespace (drives)',
     'File mtime status (fileage)',
     'Free Memory monitor (memory)',
-    'Load averages (processor)',
+    'Load averages (cpuload)',
     'Host IP status (ip_addrs)',
     'MongoDB query (mongodbstat)'
 ]
