@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from . import check_token, _query_nodeping_api, config
+from . import _query_nodeping_api, config
 
 API_URL = config.API_URL
 
@@ -19,8 +19,6 @@ def get_probe(token, probe="All"):
     :return: Returns all information about the specified probe(s)
     :rtype: dict
     """
-
-    check_token.is_valid(token)
 
     if probe == "All":
         url = "{0}info/probe?token={1}".format(API_URL, token)
@@ -40,8 +38,6 @@ def get_location(token, location="All"):
     :return: Returns all innformation about the specified location(s)
     :rtype: dict
     """
-
-    check_token.is_valid(token)
 
     if location == "All":
         url = "{0}info/location?token={1}".format(API_URL, token)

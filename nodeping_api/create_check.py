@@ -4,9 +4,9 @@
 """ Module for creating NodePing checks
 """
 
-from . import check_token, _query_nodeping_api, config
+from . import _query_nodeping_api, _utils, config
 
-API_URL = config.API_URL
+API_URL = "{0}checks".format(config.API_URL)
 
 DEFAULTS = {
     'interval': 15,
@@ -18,31 +18,6 @@ DEFAULTS = {
     'threshold': 5,
     'sens': 2
 }
-
-
-def _create_url(token, customerid):
-    """ Creates the url for sending data to NodePing
-
-    Formats the url based on whether or not the
-    customerid is None
-
-    :type token: string
-    :param token: Your NodePing API token
-    :type customerid: string
-    :param customerid: Optional subaccount ID for your account
-    :return: URL that will be used for HTTP request
-    :rtype: string
-    """
-
-    check_token.is_valid(token)
-
-    if customerid:
-        url = "{0}checks?token={1}&customerid={2}".format(
-            API_URL, token, customerid)
-    else:
-        url = "{0}checks?token={1}".format(API_URL, token)
-
-    return url
 
 
 def _package_variables(variables, check_type):
@@ -127,7 +102,7 @@ def audio_check(
     """
 
     check_variables = _package_variables(locals(), 'AUDIO')
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -198,7 +173,7 @@ def cluster_check(
     data = check_variables['data']['data']
     check_variables['data'] = data
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -223,6 +198,7 @@ def dns_check(
         sens=DEFAULTS['sens'],
         dep="",
         notifications="",
+        verify=False,
         **kwargs
 ):
     """ Creates a NodePing DNS check
@@ -266,13 +242,15 @@ def dns_check(
     :type notifications: list
     :param notifications: list of objects containing contact ID, delay, and
     scheduling for notifications
+    :type verify: bool
+    :param verify: If True will authenticate using DNSSEC
     :return: Response from NodePing
     :rtype: dict
     """
 
     check_variables = _package_variables(locals(), 'DNS')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -343,7 +321,7 @@ def ftp_check(
 
     check_variables = _package_variables(locals(), 'FTP')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -405,7 +383,7 @@ def http_check(
 
     check_variables = _package_variables(locals(), 'HTTP')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -497,7 +475,7 @@ def httpadv_check(
 
     check_variables = _package_variables(locals(), 'HTTPADV')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -567,7 +545,7 @@ def httpcontent_check(
 
     check_variables = _package_variables(locals(), 'HTTPCONTENT')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -649,7 +627,7 @@ def httpparse_check(
     fields = check_variables['fields']['fields']
     check_variables['fields'] = fields
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -726,7 +704,7 @@ def imap4_check(
 
     check_variables = _package_variables(locals(), 'IMAP4')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -782,7 +760,7 @@ def mysql_check(
 
     check_variables = _package_variables(locals(), 'IMAP4')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -848,7 +826,7 @@ def ntp_check(
 
     check_variables = _package_variables(locals(), 'NTP')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -911,7 +889,7 @@ def ping_check(
 
     check_variables = _package_variables(locals(), 'PING')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -992,7 +970,7 @@ def pop3_check(
 
     check_variables = _package_variables(locals(), 'POP3')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -1053,7 +1031,7 @@ def port_check(
 
     check_variables = _package_variables(locals(), 'PORT')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -1140,7 +1118,7 @@ def push_check(
     fields = check_variables['fields']
     check_variables['fields'] = fields
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -1204,7 +1182,7 @@ def rbl_check(
 
     check_variables = _package_variables(locals(), 'RBL')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -1260,7 +1238,149 @@ def rdp_check(
 
     check_variables = _package_variables(locals(), 'RDP')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
+
+    return _query_nodeping_api.post(url, check_variables)
+
+
+def spec10dns_check(
+        token,
+        data,
+        customerid="",
+        label="",
+        interval=DEFAULTS['interval'],
+        enabled=DEFAULTS['enabled'],
+        public=DEFAULTS['public'],
+        runlocations=DEFAULTS['runlocations'],
+        homeloc=DEFAULTS['homeloc'],
+        threshold=DEFAULTS['threshold'],
+        sens=DEFAULTS['sens'],
+        dep="",
+        notifications="",
+        **kwargs
+):
+    """ Creates a NodePing SPEC10DNS check. Allows you to have a
+    check pass/fail based on the status of other DNS checks. Data is
+    expected to be a dictionary with a key "data" and values being
+    the ID of checks for the parent with values of 1 or 0 for pass
+    or fail.
+
+    Example dictionary:
+        checks = {
+        "data": {
+        "201205050153W2Q4C-0J2HSIRF": "1",
+        "201205050153W2Q4C-4RZT8MLN": "1",
+        "201205050153W2Q4C-IOPPFQOT": "1"
+        }
+        }
+
+    :type token: string
+    :param token: NodePing account API token
+    :type data: dict
+    :param data: Dict of child DNS checks
+    :type customerid: string
+    :param customerid: Optional NodePing subaccount ID
+    :type label: string
+    :param label: Name of check that will be created
+    :type interval: int
+    :param interval: Interval in minutes to monitor target
+    :type enabled: bool
+    :param enabled: If created check will be enabled or disabled
+    :type public: bool
+    :param public: If the results for the created check will be public or not
+    :type runlocations: str
+    :param runlocations: Which region to be originated from
+    :type homeloc: str
+    :param homeloc: Which probe in the region to originate the check from
+    :type threshold: int
+    :param threshold: Time in seconds for an acceptable response
+    :type sens: int
+    :param sens: Rechecks to help avoid unnecessary notifications
+    :type dep: string
+    :param dep: ID of the check used for the notification dependency
+    :type notifications: list
+    :param notifications: list of objects containing contact ID, delay, and
+    scheduling for notifications
+    :return: Response from NodePing
+    :rtype: dict
+    """
+
+    check_variables = _package_variables(locals(), 'SPEC10DNS')
+    data = check_variables['data']['data']
+    check_variables['data'] = data
+
+    url = _utils.create_url(token, API_URL, customerid)
+
+    return _query_nodeping_api.post(url, check_variables)
+
+
+def spec10rdds_check(
+        token,
+        data,
+        customerid="",
+        label="",
+        interval=DEFAULTS['interval'],
+        enabled=DEFAULTS['enabled'],
+        public=DEFAULTS['public'],
+        runlocations=DEFAULTS['runlocations'],
+        homeloc=DEFAULTS['homeloc'],
+        threshold=DEFAULTS['threshold'],
+        sens=DEFAULTS['sens'],
+        dep="",
+        notifications="",
+        **kwargs
+):
+    """ Creates a NodePing SPEC10RDDS check. Allows you to have a
+    check pass/fail based on the status of other WHOIS checks. Data is
+    expected to be a dictionary with a key "data" and values being
+    the ID of checks for the parent with values of 1 or 0 for pass
+    or fail.
+
+    Example dictionary:
+        checks = {
+        "data": {
+        "201205050153W2Q4C-0J2HSIRF": "1",
+        "201205050153W2Q4C-4RZT8MLN": "1",
+        "201205050153W2Q4C-IOPPFQOT": "1"
+        }
+        }
+
+    :type token: string
+    :param token: NodePing account API token
+    :type data: dict
+    :param data: Dict of child WHOIS checks
+    :type customerid: string
+    :param customerid: Optional NodePing subaccount ID
+    :type label: string
+    :param label: Name of check that will be created
+    :type interval: int
+    :param interval: Interval in minutes to monitor target
+    :type enabled: bool
+    :param enabled: If created check will be enabled or disabled
+    :type public: bool
+    :param public: If the results for the created check will be public or not
+    :type runlocations: str
+    :param runlocations: Which region to be originated from
+    :type homeloc: str
+    :param homeloc: Which probe in the region to originate the check from
+    :type threshold: int
+    :param threshold: Time in seconds for an acceptable response
+    :type sens: int
+    :param sens: Rechecks to help avoid unnecessary notifications
+    :type dep: string
+    :param dep: ID of the check used for the notification dependency
+    :type notifications: list
+    :param notifications: list of objects containing contact ID, delay, and
+    scheduling for notifications
+    :return: Response from NodePing
+    :rtype: dict
+    """
+
+    check_variables = _package_variables(locals(), 'SPEC10RDDS')
+    data = check_variables['data']['data']
+    check_variables['data'] = data
+
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -1316,7 +1436,7 @@ def sip_check(
 
     check_variables = _package_variables(locals(), 'SIP')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -1395,7 +1515,7 @@ def smtp_check(
 
     check_variables = _package_variables(locals(), 'SMTP')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -1485,7 +1605,7 @@ def snmp_check(
     fields = check_variables['fields']
     check_variables['fields'] = fields
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -1554,7 +1674,7 @@ def ssh_check(
 
     check_variables = _package_variables(locals(), 'SSH')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -1613,7 +1733,7 @@ def ssl_check(
 
     check_variables = _package_variables(locals(), 'SSL')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -1678,7 +1798,7 @@ def websocket_check(
 
     check_variables = _package_variables(locals(), 'WEBSOCKET')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)
 
@@ -1749,6 +1869,6 @@ def whois_check(
 
     check_variables = _package_variables(locals(), 'WHOIS')
 
-    url = _create_url(token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.post(url, check_variables)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from . import check_token, _query_nodeping_api, config
+from . import _query_nodeping_api, config
 
 API_URL = config.API_URL
 
@@ -27,8 +27,6 @@ def get_notifications(token,
     :return: Notifications for account based on parameters set
     :rtype: list
     """
-
-    check_token.is_valid(token)
 
     arguments = locals()
     set_args = {}

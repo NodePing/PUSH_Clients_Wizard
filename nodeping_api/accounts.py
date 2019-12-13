@@ -1,9 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from . import check_token, _query_nodeping_api, config
+"""
+Manage your account and subaccounts via the API, as referenced
+in the NodePing documentation.
 
-API_URL = config.API_URL
+https://nodeping.com/docs-api-accounts.html
+
+If an invalid token is supplied, you will receive a dictionary with
+a key called "error"
+"""
+
+from . import _query_nodeping_api, _utils, config
+
+API_URL = "{0}accounts".format(config.API_URL)
 
 
 def get_account(token, customerid=None):
@@ -15,15 +25,10 @@ def get_account(token, customerid=None):
     :type customerid: str
     :return: Info that was returned from NodePing about the account
     :rtype: dict
+
     """
 
-    check_token.is_valid(token)
-
-    if customerid:
-        url = "{0}accounts?token={1}&customerid={2}".format(
-            API_URL, token, customerid)
-    else:
-        url = "{0}accounts?token={1}".format(API_URL, token)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.get(url)
 
@@ -56,9 +61,7 @@ def create_subaccount(token,
     :rtype: dict
     """
 
-    check_token.is_valid(token)
-
-    url = "{0}accounts?token={1}".format(API_URL, token)
+    url = "{0}?token={1}".format(API_URL, token)
 
     data = locals()
 
@@ -98,16 +101,10 @@ def update_account(token,
     :rtype: dict
     """
 
-    check_token.is_valid(token)
+    url = _utils.create_url(token, API_URL, customerid)
 
     parameters = locals()
     data = {}
-
-    if customerid:
-        url = "{0}accounts?token={1}&customerid={2}".format(
-            API_URL, token, customerid)
-    else:
-        url = "{0}accounts?token={1}".format(API_URL, token)
 
     for key, value in parameters.items():
         if value:
@@ -127,10 +124,7 @@ def delete_account(token, customerid):
     :rtype: dict
     """
 
-    check_token.is_valid(token)
-
-    url = "{0}accounts?token={1}&customerid={2}".format(
-        API_URL, token, customerid)
+    url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.delete(url)
 
@@ -153,11 +147,7 @@ def disable_notifications(token,
     :rtype: dict
     """
 
-    if customerid:
-        url = "{0}accounts?token={1}&customerid={2}&accountsupressall={3}".format(
-            API_URL, token, customerid, accountsupressall)
-    else:
-        url = "{0}accounts?token={1}&accountsupressall={2}".format(
-            API_URL, token, accountsupressall)
+    url = _utils.create_url(token, "{0}?accountsupressall={1}".format(
+        API_URL, accountsupressall), customerid)
 
     return _query_nodeping_api.put(url)

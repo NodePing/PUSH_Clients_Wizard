@@ -1,9 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from . import check_token, _query_nodeping_api, config
+"""
+Enable or disable checks on your account or subaccount.
+Disable checks by label, the target, by check type
+(such as PING, PUSH, HTTP) and disable all.
+"""
 
-API_URL = config.API_URL
+from . import _utils, _query_nodeping_api, config
+
+API_URL = "{0}checks".format(config.API_URL)
 
 
 def disable_by_label(token, label, disable=False, customerid=None):
@@ -25,19 +31,14 @@ def disable_by_label(token, label, disable=False, customerid=None):
     :return: Dictionary with response from NodePing about disabled check(s)
     """
 
-    check_token.is_valid(token)
-
     if disable:
         disable = "true"
     else:
         disable = "false"
 
-    if customerid:
-        url = "{0}checks?token={1}&customerid={2}&label={3}&disableall={4}".format(
-            API_URL, token, customerid, label, disable)
-    else:
-        url = "{0}checks?token={1}&label={2}&disableall={3}".format(
-            API_URL, token, label, disable)
+    url = "{0}?label={1}&disableall={2}".format(
+        API_URL, _utils.escape_url_string(label), disable)
+    url = _utils.create_url(token, url, customerid)
 
     return _query_nodeping_api.put(url)
 
@@ -52,7 +53,7 @@ def disable_by_target(token, target, disable=False, customerid=None):
     :type token: string
     :param token: API token from NodePing
     :type target: string
-    :param: URL of target to disable checks for
+    :param target: URL of target to disable checks for
     :type disable: bool
     :param disable: Whether the check(s) should be enabled or disables
     :type customerid: string
@@ -61,19 +62,13 @@ def disable_by_target(token, target, disable=False, customerid=None):
     :return: Dictionary with response from NodePing about disabled check(s)
     """
 
-    check_token.is_valid(token)
-
     if disable:
         disable = "true"
     else:
         disable = "false"
 
-    if customerid:
-        url = "{0}checks?token={1}&customerid={2}&target={3}&disableall={4}".format(
-            API_URL, token, customerid, target, disable)
-    else:
-        url = "{0}checks?token={1}&target={2}&disableall={3}".format(
-            API_URL, token, target, disable)
+    url = "{0}?target={1}&disableall={2}".format(API_URL, target, disable)
+    url = _utils.create_url(token, url, customerid)
 
     return _query_nodeping_api.put(url)
 
@@ -97,19 +92,13 @@ def disable_by_type(token, _type, disable=False, customerid=None):
     :return: Dictionary with response from NodePing about disabled check(s)
     """
 
-    check_token.is_valid(token)
-
     if disable:
         disable = "true"
     else:
         disable = "false"
 
-    if customerid:
-        url = "{0}checks?token={1}&customerid={2}&type={3}&disableall={4}".format(
-            API_URL, token, customerid, _type, disable)
-    else:
-        url = "{0}checks?token={1}&type={2}&disableall={3}".format(
-            API_URL, token, _type, disable)
+    url = "{0}?type={1}&disableall={2}".format(API_URL, _type, disable)
+    url = _utils.create_url(token, url, customerid)
 
     return _query_nodeping_api.put(url)
 
@@ -131,18 +120,12 @@ def disable_all(token, disable=False, customerid=None):
     :return:O Dictionary with response from NodePing about disabled check(s)
     """
 
-    check_token.is_valid(token)
-
     if disable:
         disable = "true"
     else:
         disable = "false"
 
-    if customerid:
-        url = "{0}checks?token={1}&customerid={2}&disableall={3}".format(
-            API_URL, token, customerid, disable)
-    else:
-        url = "{0}checks?token={1}&disableall={2}".format(
-            API_URL, token, disable)
+    url = "{0}?disableall={1}".format(API_URL, disable)
+    url = _utils.create_url(token, url, customerid)
 
     return _query_nodeping_api.put(url)

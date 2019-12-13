@@ -34,7 +34,7 @@ def post(url, data_dictionary):
     try:
         data = urlopen(req, json_data)
     except httperror as err:
-        return err
+        data = err
 
     json_bytes = data.read()
 
@@ -72,7 +72,7 @@ def put(url, data_dictionary=None):
         else:
             data = urlopen(req)
     except httperror as err:
-        return err
+        data = err
 
     json_bytes = data.read()
 
@@ -97,7 +97,7 @@ def get(url):
     try:
         data = urlopen(req)
     except httperror as err:
-        return err
+        data = err
 
     json_bytes = data.read()
 
@@ -123,7 +123,7 @@ def delete(url):
     try:
         data = urlopen(req)
     except httperror as err:
-        return err
+        data = err
 
     json_bytes = data.read()
 

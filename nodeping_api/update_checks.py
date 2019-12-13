@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from . import check_token, _query_nodeping_api, config
+"""
+Update one or many checks on a NodePing account or subaccount
+"""
 
-API_URL = config.API_URL
+from . import _query_nodeping_api, _utils, config
+
+API_URL = "{0}checks".format(config.API_URL)
 
 
 def update(token, checkid, checktype, fields, customerid=None):
@@ -27,18 +31,8 @@ def update(token, checkid, checktype, fields, customerid=None):
     :return: Return information from NodePing query
     """
 
-    if not isinstance(checkid, str):
-        # print("To update many checks, use the update_many method")
-        raise StrExpected
-
-    check_token.is_valid(token)
-
-    if customerid:
-        url = "{0}checks/{1}?token={2}&customerid={3}".format(
-            API_URL, checkid, token, customerid)
-    else:
-        url = "{0}checks/{1}?token={2}".format(
-            API_URL, checkid, token)
+    url = "{0}/{1}".format(API_URL, checkid)
+    url = _utils.create_url(token, url, customerid)
 
     fields.update({"type": checktype.upper()})
 
@@ -66,18 +60,9 @@ def update_many(token, checkids, fields, customerid=None):
 
     updated_checks = []
 
-    if not isinstance(checkids, dict):
-        raise DictExpected
-
-    check_token.is_valid(token)
-
     for checkid, checktype in checkids.items():
-        if customerid:
-            url = "{0}checks/{1}?token={2}&customerid={3}".format(
-                API_URL, checkid, token, customerid)
-        else:
-            url = "{0}checks/{1}?token={2}".format(
-                API_URL, checkid, token)
+        url = "{0}/{1}".format(API_URL, checkid)
+        url = _utils.create_url(token, url, customerid)
 
         send_fields = fields.copy()
         send_fields.update({"type": checktype.upper()})
@@ -85,17 +70,3 @@ def update_many(token, checkids, fields, customerid=None):
         updated_checks.append(_query_nodeping_api.put(url, send_fields))
 
     return updated_checks
-
-
-class StrExpected(Exception):
-    """ Raised if the proper type isn't supplied
-    """
-
-    pass
-
-
-class DictExpected(Exception):
-    """ Raised if the proper type isn't supplied
-    """
-
-    pass

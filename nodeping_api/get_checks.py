@@ -1,9 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from . import check_token, _query_nodeping_api, config
+""" Get checks that were created on your NodePing account.
 
-API_URL = config.API_URL
+Allows you go get all checks, get passing, failing, by its ID,
+disabled checks, and last results for a check.
+"""
+
+from . import _query_nodeping_api, _utils, config
+
+API_URL = "{0}checks".format(config.API_URL)
 
 
 class GetChecks:
@@ -21,9 +27,6 @@ class GetChecks:
         self.checkid = checkid
         self.customerid = customerid
 
-        # Checks to see if the API token provided is valid
-        check_token.is_valid(self.token)
-
     def all_checks(self):
         """ Gets all checks that exist for the account
 
@@ -34,11 +37,7 @@ class GetChecks:
         customerid to output subaccount checks
         """
 
-        if self.customerid:
-            url = "{0}checks?token={1}&customerid={2}".format(
-                API_URL, self.token, self.customerid)
-        else:
-            url = "{0}checks?token={1}".format(API_URL, self.token)
+        url = _utils.create_url(self.token, API_URL, self.customerid)
 
         return _query_nodeping_api.get(url)
 
@@ -52,11 +51,7 @@ class GetChecks:
 
         passing_checks = {}
 
-        if self.customerid:
-            url = "{0}checks?token={1}&customerid={2}".format(
-                API_URL, self.token, self.customerid)
-        else:
-            url = "{0}checks?token={1}".format(API_URL, self.token)
+        url = _utils.create_url(self.token, API_URL, self.customerid)
 
         all_checks_dictionary = _query_nodeping_api.get(url)
 
@@ -82,11 +77,7 @@ class GetChecks:
 
         failing_checks = {}
 
-        if self.customerid:
-            url = "{0}checks?token={1}&customerid={2}".format(
-                API_URL, self.token, self.customerid)
-        else:
-            url = "{0}checks?token={1}".format(API_URL, self.token)
+        url = _utils.create_url(self.token, API_URL, self.customerid)
 
         all_checks_dictionary = _query_nodeping_api.get(url)
 
@@ -109,8 +100,8 @@ class GetChecks:
         specified ID. Returns the contents for that check
         """
 
-        url = "{0}checks/{1}?token={2}".format(API_URL,
-                                               self.checkid, self.token)
+        url = "{0}/{1}".format(API_URL, self.checkid)
+        url = _utils.create_url(self.token, url, self.customerid)
 
         return _query_nodeping_api.get(url)
 
@@ -123,7 +114,8 @@ class GetChecks:
 
         disabled_checks = {}
 
-        url = "{0}results/current?token={1}".format(API_URL, self.token)
+        url = "{0}results/current".format(config.API_URL)
+        url = _utils.create_url(self.token, url, self.customerid)
 
         events_checks = _query_nodeping_api.get(url)
 
@@ -136,8 +128,10 @@ class GetChecks:
         return disabled_checks
 
     def last_result(self):
+        """ Get the last result for the specified check
+        """
 
-        url = "{0}checks/{1}?token={2}&lastresult=true".format(
-            API_URL, self.checkid, self.token)
+        url = "{0}/{1}?lastresult=true".format(API_URL, self.checkid)
+        url = _utils.create_url(self.token, url, self.customerid)
 
         return _query_nodeping_api.get(url)

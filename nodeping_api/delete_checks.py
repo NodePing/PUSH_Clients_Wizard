@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from . import check_token, _query_nodeping_api, config
 
-API_URL = config.API_URL
+"""
+Delete a NodePing check on an account or subaccount.
+"""
+
+from . import _utils, _query_nodeping_api, config
+
+API_URL = "{0}checks".format(config.API_URL)
 
 
 def remove(token, checkid, customerid=None):
@@ -19,12 +24,7 @@ def remove(token, checkid, customerid=None):
     :return: Dictionary with response from NodePing about check removal
     """
 
-    check_token.is_valid(token)
-
-    if customerid:
-        url = "{0}checks/{1}?token={2}&customerid={3}".format(
-            API_URL, checkid, token, customerid)
-    else:
-        url = "{0}checks/{1}?token={2}".format(API_URL, checkid, token)
+    url = "{0}/{1}".format(API_URL, checkid)
+    url = _utils.create_url(token, url, customerid)
 
     return _query_nodeping_api.delete(url)

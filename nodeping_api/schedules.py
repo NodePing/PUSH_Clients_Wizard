@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from . import check_token, _query_nodeping_api, config
+"""
+Get, create, update, and delete schedules for notifications.
+"""
 
-API_URL = config.API_URL
+from . import _query_nodeping_api, _utils, config
+
+API_URL = "{0}schedules".format(config.API_URL)
 
 
 def get_schedule(token, schedule=None, customerid=None):
@@ -23,18 +27,11 @@ def get_schedule(token, schedule=None, customerid=None):
     :rtype: dict
     """
 
-    check_token.is_valid(token)
-
-    if customerid and not schedule:
-        url = "{0}schedules?token={1}&customerid={2}".format(
-            API_URL, token, customerid)
-    elif customerid and schedule:
-        url = "{0}schedules/{1}?token={2}&customerid={3}".format(
-            API_URL, schedule, token, customerid)
-    elif not customerid and not schedule:
-        url = "{0}schedules?token={1}".format(API_URL, token)
-    elif not customerid and schedule:
-        url = "{0}schedules/{1}?token={2}".format(API_URL, schedule, token)
+    if schedule:
+        url = "{0}/{1}".format(API_URL, schedule)
+        url = _utils.create_url(token, url, customerid)
+    else:
+        url = _utils.create_url(token, API_URL, customerid)
 
     return _query_nodeping_api.get(url)
 
@@ -74,14 +71,8 @@ def create_schedule(token, data, schedule_name, customerid=None):
     allday: True/False - enables notifications for the entire day.
     """
 
-    check_token.is_valid(token)
-
-    if customerid:
-        url = "{0}schedules/{1}?token={2}&customerid={3}".format(
-            API_URL, schedule_name, token, customerid)
-    else:
-        url = "{0}schedules/{1}?token={2}".format(
-            API_URL, schedule_name, token)
+    url = "{0}/{1}".format(API_URL, schedule_name)
+    url = _utils.create_url(token, url, customerid)
 
     return _query_nodeping_api.post(url, data)
 
@@ -121,14 +112,8 @@ def update_schedule(token, data, schedule_name, customerid=None):
     allday: True/False - enables notifications for the entire day.
     """
 
-    check_token.is_valid(token)
-
-    if customerid:
-        url = "{0}schedules/{1}?token={2}&customerid={3}".format(
-            API_URL, schedule_name, token, customerid)
-    else:
-        url = "{0}schedules/{1}?token={2}".format(
-            API_URL, schedule_name, token)
+    url = "{0}/{1}".format(API_URL, schedule_name)
+    url = _utils.create_url(token, url, customerid)
 
     return _query_nodeping_api.put(url, data)
 
@@ -148,12 +133,7 @@ def delete_schedule(token, schedule, customerid=None):
     :rtype: dict
     """
 
-    check_token.is_valid(token)
-
-    if customerid:
-        url = "{0}schedules/{1}?token={2}&customerid={3}".format(
-            API_URL, schedule, token, customerid)
-    else:
-        url = "{0}schedules/{1}?token={2}".format(API_URL, schedule, token)
+    url = "{0}/{1}".format(API_URL, schedule)
+    url = _utils.create_url(token, url, customerid)
 
     return _query_nodeping_api.delete(url)

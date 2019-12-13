@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from . import check_token, _query_nodeping_api, config
+from . import _utils, _query_nodeping_api, config
 
-API_URL = config.API_URL
+API_URL = "{0}results".format(config.API_URL)
 
 
 def get_results(token,
@@ -59,10 +59,8 @@ def get_results(token,
     :rtype: dict
     """
 
-    check_token.is_valid(token)
-
     parameters = locals()
-    url = "{0}results/{1}?token={2}".format(API_URL, check_id, token)
+    url = "{0}/{1}?token={2}".format(API_URL, check_id, token)
 
     for key, value in parameters.items():
         if key in ("token", "check_id"):
@@ -97,10 +95,8 @@ def get_uptime(token,
     :rtype: dict
     """
 
-    check_token.is_valid(token)
-
     parameters = locals()
-    url = "{0}results/uptime/{1}?token={2}".format(API_URL, check_id, token)
+    url = "{0}/uptime/{1}?token={2}".format(API_URL, check_id, token)
 
     for key, value in parameters.items():
         if key in ("token", "check_id"):
@@ -125,12 +121,7 @@ def get_current(token, customerid=None):
     :rtype: dict
     """
 
-    check_token.is_valid(token)
-
-    if customerid:
-        url = "{0}results/current?token={1}&customerid={2}".format(
-            API_URL, token, customerid)
-    else:
-        url = "{0}results/current?token={1}".format(API_URL, token)
+    url = "{0}/current".format(API_URL)
+    url = _utils.create_url(token, url, customerid)
 
     return _query_nodeping_api.get(url)
