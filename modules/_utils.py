@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import paramiko
-import urllib.request
 from getpass import getuser
 from os import name as os_name
-from os.path import isdir, isfile, join
+from os.path import isfile, join
+import urllib.request
+import paramiko
 from PyInquirer import prompt, Validator, ValidationError
 
 
@@ -132,7 +132,7 @@ def confirm_choice(questions):
 
 
 def inquirer_confirm(message, default=True):
-    """
+    """ Prompts the user for a simple yes or no response
     """
 
     questions = [
@@ -172,7 +172,7 @@ def make_missing_dirs(sftp_client, remote_dir, remote_os):
         dirs += "{0}{1}".format(_dir, path_seperator)
 
         try:
-            exists = sftp_client.stat(dirs)
+            sftp_client.stat(dirs)
         except FileNotFoundError:
             sftp_client.mkdir(dirs)
 

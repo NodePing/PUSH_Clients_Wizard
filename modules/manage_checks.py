@@ -55,22 +55,14 @@ def _fetch_checks(token, customerid=None):
     checks that are of type PUSH
     """
 
-    push_checks = {}
-
     query_nodeping = get_checks.GetChecks(token, customerid=customerid)
     checks = query_nodeping.all_checks()
 
-    for key, value in checks.items():
-        _type = value['type']
-
-        if _type == 'PUSH':
-            push_checks.update({key: value})
-
-    return push_checks
+    return {key: value for key, value in checks.items() if value['type'] == "PUSH"}
 
 
 def list_checks(token, customerid=None):
-    """ List PUSH checks that are fetched with _fetch_checks
+    """ List fetched PUSH checks
 
     Asks the user if they want to print all PUSH checks in a
     user-readable format. Also asks if the user wants to print
@@ -86,22 +78,20 @@ def list_checks(token, customerid=None):
 
     push_checks = _fetch_checks(token, customerid)
 
-    next = ""
-
-    print("\n")
-
     if not push_checks:
-        print("No push checks created for this account account")
+        print("\nNo push checks created for this account account")
         return
 
     message = 'Print all PUSH checks at once?'
     printall = _utils.inquirer_confirm(message, default=False)
 
     if printall:
-        next = 'A'
+        next_check = 'A'
+    else:
+        next_check = None
 
     # Prints each check in a user-readable format
-    for key, contents in push_checks.items():
+    for _key, contents in push_checks.items():
 
         # If no label, substitute for placeholder
         try:
@@ -137,9 +127,10 @@ def list_checks(token, customerid=None):
 
         print("Interval: %s\n" % contents['interval'])
 
-        if next != 'A':
-            next = input("Enter for next, (a)ll checks or (s)top ").upper()
-        if next == 'S':
+        if next_check != 'A':
+            next_check = input(
+                "Enter for next, (a)ll checks or (s)top ").upper()
+        if next_check == 'S':
             break
 
     _utils.seperator()
@@ -169,7 +160,7 @@ def configure(token, customerid=None):
         metrics = _variables.posix_metrics
     elif client == "PowerShell":
         metrics = _variables.powershell_metrics
-    elif client == "Python" or client == "Python3":
+    elif client in ("Python", "Python3"):
         metrics = _variables.python_metrics
 
     metrics_list = _utils.list_to_dicts(metrics, 'name')
@@ -237,7 +228,6 @@ def configure(token, customerid=None):
 
     # Asks user if they want to create the check for their subaccount or main
     if customerid:
-
         subacount_msg = "Do you want to create your check with your subaccount?"
         use_subaccount = _utils.inquirer_confirm(subacount_msg, default=False)
 
@@ -300,12 +290,9 @@ def configure(token, customerid=None):
             get_again = _utils.inquirer_confirm(message)
 
             if get_again:
-                downloaded = _utils.download_file(CLIENTS_URL, CLIENT_ZIP)
-            else:
-                # Set to true because the file already exists
-                downloaded = True
+                _utils.download_file(CLIENTS_URL, CLIENT_ZIP)
         else:
-            downloaded = _utils.download_file(CLIENTS_URL, CLIENT_ZIP)
+            _utils.download_file(CLIENTS_URL, CLIENT_ZIP)
             print("File downloaded")
 
         # Configures the client
@@ -349,7 +336,7 @@ def delete(token, customerid=None):
 
     checks_list = []
 
-    for key, value in checks.items():
+    for _key, value in checks.items():
 
         # If no label exists, set label to (No Label)
         try:
@@ -389,7 +376,7 @@ def delete(token, customerid=None):
 
     # Deletes all selected checks
     if confirm:
-        for key, value in checks.items():
+        for _key, value in checks.items():
             checktoken = value['parameters']['checktoken']
 
             for to_remove in answers['remove_checks']:
@@ -398,7 +385,7 @@ def delete(token, customerid=None):
                     try:
                         delete_checks.remove(token, checkid)
                     except urllib.error.URLError:
-                        raise("Lost connection to NodePing")
+                        raise "Lost connection to NodePing"
 
                     print("Deleted %s" % to_remove)
 
