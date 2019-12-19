@@ -3,3 +3,5 @@ PUSH_Clients-master
 **__pycache__**
 windows_task.ps1
 *~
+config.ini
+.gitignore
