@@ -13,6 +13,9 @@ CONFIGFILE = join(dirname(realpath(expanduser(__file__))), "config.ini")
 
 
 def created_check(info):
+    """ Print out the information of the check that was just created
+    """
+
     try:
         label = info['label']
     except KeyError:
@@ -37,10 +40,12 @@ def created_check(info):
     print(output)
     pprint(fields)
 
+    # Print out the required info for Windows PowerShell
     if job and "Set-ScheduledTask" in job:
         print("\nRun these commands in your Windows PowerShell as the administrator:\n")
         print("{0}\n".format(job))
         print("Or run the created windows_task.ps1 PowerShell script as administrator\n\n")
+    # Print out a cron job for everything else
     elif job:
         print("\nEnter this cron line to run the client at your specified interval:\n")
         print("{0}\n".format(job))
@@ -49,6 +54,11 @@ def created_check(info):
 
 
 def main():
+    """ Prompt the user for which action they want to take
+
+    List, create, delete checks s well as set the user token and/or customerid
+    if desired.
+    """
 
     config = configparser.ConfigParser()
     config.read(CONFIGFILE)
