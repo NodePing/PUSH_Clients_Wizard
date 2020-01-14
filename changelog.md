@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2020-01-13]
+
+### Added
+- POSIX client can be set up with the memavail module
+
 ## [2019-12-19]
 
 ### Added
