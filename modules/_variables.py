@@ -12,6 +12,7 @@ posix_metrics = [
     'Iocage jail status (iocage)',
     'IP addresses on host (ip_addrs)',
     'Free Memory monitor (memory)',
+    'Memory Available monitor (memavail)',
     'MongoDB query (mongodbstat)',
     'MySQL query (mysqlstat)',
     'PostgreSQL query (pgsqlstat)',
