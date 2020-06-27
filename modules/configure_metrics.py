@@ -119,6 +119,10 @@ def main(metrics, client):
                 import modules.metrics.cpu_utilization as cpu_utilization
 
                 data = cpu_utilization.cpu_utilization_metric("cpu_utilization")
+            elif "disk_utilization" in metric:
+                import modules.metrics.disk_utilization as disk_utilization
+
+                data = disk_utilization.disk_utilization_metric("disk_utilization")
             elif "checkpid" in metric:
                 data = checkpid_metric("checkpid")
             elif "drives" in metric:
@@ -163,6 +167,14 @@ def main(metrics, client):
                 import modules.metrics.processor as processor
 
                 data = processor.processor_metric("load", client)
+            elif "net_utilization" in metric:
+                import modules.metrics.net_utilization as net_utilization
+
+                data = net_utilization.net_utilization_metric("net_utilization")
+            elif "ram_utilization" in metric:
+                import modules.metrics.ram_utilization as ram_utilization
+
+                data = ram_utilization.ram_utilization_metric("ram_utilization")
             elif "memavail" in metric:
                 import modules.metrics.memavail as memavail
 

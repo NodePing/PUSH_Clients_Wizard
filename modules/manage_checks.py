@@ -306,7 +306,7 @@ def configure(token, customerid=None):
         # Create cron job or windows scheduled task based on target OS
         if os == 'Windows':
             scheduled_job = _utils.create_win_schedule(
-                user, remote_dir, client, interval, label)
+                remote_dir, client, interval, label)
         else:
             scheduled_job = _utils.create_cron(
                 remote_dir, client, interval, label)

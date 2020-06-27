@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2020-06-27]
+
+### Added
+
+Powershell and POSIX can setup:
+- net_utilization
+- cpu_utilization
+- disk_utilization
+- ram_utilization
+
 ## [2020-01-13]
 
 ### Added
