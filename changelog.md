@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2023-10-02]
+
+* PyInquirer stopped working with newer versions of Python, switch to InquirerPy
+* Ensure Wizard works with change to POSIX PUSH client
+* Some small bug fixes
+
 ## [2020-06-27]
 
 ### Added
