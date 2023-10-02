@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-from PyInquirer import prompt
+from InquirerPy import prompt
 from os.path import expanduser, isfile
 
 field_options = {}

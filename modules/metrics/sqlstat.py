@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from os.path import join
-from PyInquirer import prompt
+from InquirerPy import prompt
 from modules import _utils
 
 

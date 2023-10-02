@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from PyInquirer import prompt
+from InquirerPy import prompt
 from nodeping_api import contacts, group_contacts, schedules
 
 from . import _utils

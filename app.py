@@ -6,7 +6,7 @@ from os.path import dirname, expanduser, join, realpath
 from sys import exit
 from modules import _utils, manage_checks
 from pprint import pprint
-from PyInquirer import prompt
+from InquirerPy import prompt
 
 
 CONFIGFILE = join(dirname(realpath(expanduser(__file__))), "config.ini")

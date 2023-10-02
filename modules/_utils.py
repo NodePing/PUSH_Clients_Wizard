@@ -6,7 +6,7 @@ from os import name as os_name
 from os.path import isfile, join
 import urllib.request
 import paramiko
-from PyInquirer import prompt, Validator, ValidationError
+from InquirerPy import prompt
 
 
 def write_config(config, conf_ini):
@@ -98,9 +98,9 @@ def list_to_dicts(_list, key_name):
 def confirm_choice(questions):
     """ Prompts the user for input and repeats until the data is accepted
 
-    Accepts the questions in the expected format for PyInquirer. Will ask the
+    Accepts the questions in the expected format for InquirerPy. Will ask the
     list of questions until the user confirms they are correct. Once the user
-    says the data is correct, the dictionary created by PyInquirer is returned
+    says the data is correct, the dictionary created by InquirerPy is returned
     """
 
     complete = False
@@ -117,7 +117,7 @@ def confirm_choice(questions):
 
         for key, value in answers.items():
             if 'ssh_key_pass' in key or key == 'password':
-                print("{0}: {1}".format(key, "*" * len(value)))
+                print("{0}: {1}".format(key, "**********"))
             else:
                 print("{0}: {1}".format(key, value))
 
@@ -355,13 +355,3 @@ def get_interval(interval):
         return 720
     elif interval == '1 day':
         return 1440
-
-
-class IntValidator(Validator):
-    def validate(self, num):
-        try:
-            num = int(num.text)
-        except ValueError:
-            raise ValidationError(
-                message="Please enter an integer",
-                cursor_position=len(num.text))

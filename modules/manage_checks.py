@@ -6,7 +6,8 @@ import sys
 import os.path
 import urllib.error
 from os.path import abspath, dirname, isfile, join
-from PyInquirer import prompt
+from InquirerPy import prompt
+from InquirerPy.validator import NumberValidator
 from nodeping_api import delete_checks, get_checks, create_check
 from . import configure_metrics, configure_client, configure_contacts, _utils, _variables
 
@@ -163,7 +164,7 @@ def configure(token, customerid=None):
     elif client in ("Python", "Python3"):
         metrics = _variables.python_metrics
 
-    metrics_list = _utils.list_to_dicts(metrics, 'name')
+    # metrics_list = _utils.list_to_dicts(metrics, 'name')
 
     # Template of questions to ask user
     check_questions = [
@@ -210,14 +211,15 @@ def configure(token, customerid=None):
             'type': 'input',
             'name': 'sens',
             'message': 'How many intervals before results are considered \'old\'?',
-            'validate': _utils.IntValidator,
+            'validate': NumberValidator(message="Input should be number",
+                                        float_allowed=False),
             'when': lambda check_answers: check_answers['oldresultfail']
         },
         {
             'type': 'checkbox',
             'name': 'enabled_checks',
             'message': 'Select metrics to be enabled',
-            'choices': metrics_list
+            'choices': metrics
         }
     ]
 
@@ -239,19 +241,24 @@ def configure(token, customerid=None):
     contacts = configure_contacts.main(token, customerid=customerid)
     _utils.seperator()
 
+    if contacts == []:
+        contacts = ""
+
     # Removes some data before sending such as checksums and fileage so that
     # info doesn't go over the internet
     send_fields = copy.deepcopy(fields)
     send_fields = _strip_extra_data(send_fields)
+    if send_fields == {}:
+        send_fields = ""
 
     interval = _utils.get_interval(check_answers['interval'])
 
     label = check_answers['label']
 
     # Checks if sens was configured. If not configured, the value is set to 2
-    try:
+    if check_answers['sens']:
         sens = check_answers['sens']
-    except KeyError:
+    else:
         sens = 2
 
     check_results = create_check.push_check(
@@ -348,15 +355,12 @@ def delete(token, customerid=None):
 
         checks_list.append("%s - %s" % (label, checktoken))
 
-    # Needs to be converted to a list of dictionaries
-    checks_dict = _utils.list_to_dicts(checks_list, 'name')
-
     questions = [
         {
             'type': 'checkbox',
             'name': 'remove_checks',
             'message': 'Which checks do you want to delete',
-            'choices': checks_dict
+            'choices': checks_list
         }
     ]
 

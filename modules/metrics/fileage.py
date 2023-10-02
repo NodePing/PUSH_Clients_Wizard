@@ -4,7 +4,7 @@
 import json
 from os.path import join
 from pprint import pprint
-from PyInquirer import prompt
+from InquirerPy import prompt
 
 
 def fileage_metric(key_name):

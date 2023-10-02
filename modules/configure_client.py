@@ -31,17 +31,10 @@ def _add_metric(archive_dir, client_path, name, client):
 
     if client == "POSIX":
         filename = join(archive_dir, "POSIX/NodePingPUSHClient/moduleconfig")
-        metric_path = join(
-            client_path, "NodePingPUSHClient/modules/{0}/{0}.sh\n".format(name)
-        )
-
-        string = "{0}={1}".format(name, metric_path)
-
-        string = _utils.win_to_other_path(string)
 
         # Append the location of the module to the moduleconfig file
         with open(filename, "a", newline="\n") as f:
-            f.write(string)
+            f.write("{0}\n".format(name))
 
         # Make the module executable
         sh_script = join(
@@ -196,19 +189,19 @@ def _place_client(src, dest, client, _id):
                     "type": "password",
                     "name": "password",
                     "message": "Enter the remote user's password",
-                    "when": lambda answers: answers["use_password"] is "password",
+                    "when": lambda answers: answers["use_password"] == "password",
                 },
                 {
                     "type": "input",
                     "name": "ssh_key",
                     "message": "Specify the path to the ssh keys to use",
-                    "when": lambda answers: answers["use_password"] is "keys",
+                    "when": lambda answers: answers["use_password"] == "keys",
                 },
                 {
                     "type": "password",
                     "name": "ssh_key_pass",
                     "message": "Password for ssh key (if one exists)",
-                    "when": lambda answers: answers["use_password"] is "keys",
+                    "when": lambda answers: answers["use_password"] == "keys",
                 },
                 {
                     "type": "input",
@@ -374,8 +367,8 @@ def insert_checktoken(checktoken, _id, unarchived, save_path, client):
             full_path = "{0}/NodePingPUSHClient".format(save_path)
 
         # Insert CheckID and checktoken
-        filedata = filedata.replace("CHECK_ID_HERE", _id)
-        filedata = filedata.replace("CHECK_TOKEN_HERE", checktoken)
+        filedata = filedata.replace('CHECK_ID=""', 'CHECK_ID="{0}"'.format(_id))
+        filedata = filedata.replace('CHECK_TOKEN=""', 'CHECK_TOKEN="{0}"'.format(checktoken))
         filedata = filedata.replace(moduleconfig, "{0}/moduleconfig".format(full_path))
         filedata = filedata.replace(logfile, "{0}/NodePingPUSH.log".format(full_path))
 

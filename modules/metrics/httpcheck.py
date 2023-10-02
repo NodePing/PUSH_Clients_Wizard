@@ -6,7 +6,7 @@
 
 import json
 from os.path import join
-from PyInquirer import prompt
+from InquirerPy import prompt
 import modules._utils as _utils
 
 

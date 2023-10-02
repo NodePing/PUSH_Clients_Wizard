@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from PyInquirer import prompt
+from InquirerPy import prompt
 
 
 def processor_metric(key_name, client):

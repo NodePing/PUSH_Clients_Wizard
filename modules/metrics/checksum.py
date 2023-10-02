@@ -5,7 +5,7 @@ import json
 from importlib.machinery import SourceFileLoader
 from os.path import expanduser, isfile, join
 from pprint import pprint
-from PyInquirer import prompt
+from InquirerPy import prompt
 
 
 def checksum_metric(key_name, client=None):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from PyInquirer import prompt
+from InquirerPy import prompt
 
 
 def checkpf_firewall_metric(key_name):
